@@ -32,21 +32,28 @@ app.get('/', (req, res) => {
 });
 
 function handleEvent(event) {
-    let { type } = event;
     let reply = { type: 'text' };
+    if (!event) {
+        return Promise.resolve(null);
+    }
+    client.replyMessage(event.replyToken, constructReplyMessage(event.type));
+}
+
+function constructReplyMessage(type){
+    console.log(type);
     switch (type) {
         case 'text':
-            return client.replyMessage(event.replyToken, { ...reply, text: event.message.text });
+            return { ...reply, text: event.message.text };
             break;
         case 'image':
-            return client.replyMessage(event.replyToken, { ...reply, text: 'だれなんだろう?'});
+            return { ...reply, text: 'これは誰なんだろう?' };
             break;
         case 'video':
-            return client.replyMessage(event.replyToken, { ...reply, text: 'すみません、まだ動くものに慣れてなくて…'});
+            return { ...reply, text: 'すみません、動くものはまだ…' };
             break;
         default:
-            return Promise.resolve(null);
-      }    
+            return { ...reply, text: 'まだ知らないコンテンツですね。' };
+    }
 }
 
 const port = process.env.PORT || 8080;

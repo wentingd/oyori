@@ -40,19 +40,18 @@ function handleEvent(event) {
 }
 
 function constructReplyMessage(type){
-    console.log(type);
     switch (type) {
         case 'text':
-            return { ...reply, text: event.message.text };
+            return { type: 'text', text: event.message.text };
             break;
         case 'image':
-            return { ...reply, text: 'これは誰なんだろう?' };
+            return { type: 'text', text: 'これは誰なんだろう?' };
             break;
         case 'video':
-            return { ...reply, text: 'すみません、動くものはまだ…' };
+            return { type: 'text', text: 'すみません、動くものはまだ…' };
             break;
         default:
-            return { ...reply, text: 'まだ知らないコンテンツですね。' };
+            return { type: 'text', text: 'まだ知らないコンテンツですね。' };
     }
 }
 

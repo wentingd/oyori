@@ -36,14 +36,14 @@ function handleEvent(event) {
     if (!event.type || event.type !== 'message') {
         return Promise.resolve(null);
     } else {
-        client.replyMessage(event.replyToken, constructReplyMessage(event.message.type));
+        client.replyMessage(event.replyToken, constructReplyMessage(event.message.type, event.message.text));
     }   
 }
 
-function constructReplyMessage(msgType){
+function constructReplyMessage(msgType, msgText){
     switch (msgType) {
         case 'text':
-            return { type: 'text', text: 'You said :' + event.message.text };
+            return { type: 'text', text: 'You said :' + msgText };
             break;
         case 'image':
             return { type: 'text', text: 'これは何の写真なんだろう?' };

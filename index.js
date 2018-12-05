@@ -37,10 +37,6 @@
 //     return client.replyMessage(event.replyToken, echo);
 // }
 
-// app.get('/ping', function(request, response) {
-//     response.send('pong!');
-// });
-
 // const port = process.env.PORT || 3000;
 // app.listen(port, () => {
 //   console.log(`listening on ${port}`);
@@ -77,6 +73,10 @@ app.post('/callback', line.middleware(config), (req, res) => {
       console.error(err);
       res.status(500).end();
     });
+});
+
+app.get('/ping', function(request, response) {
+    response.send('pong!');
 });
 
 // event handler

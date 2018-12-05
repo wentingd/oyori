@@ -1,9 +1,19 @@
-var express = require('express');
-var app = express();
-var bodyParser = require('body-parser');
-var request = require('request');
-var async = require('async');
-var logger = require('morgan');
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
+const request = require('request');
+const async = require('async');
+const logger = require('morgan');
+const line = require("@line/bot-sdk");
+
+if (process.env.NODE_ENV !== 'production'){
+    require('dotenv').config();
+};
+
+const lineConfig = {
+    channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+    channelSecret: process.env.LINE_CHANNEL_SECRET
+};
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
@@ -13,9 +23,9 @@ app.get('/', function(request, response) {
     response.send('Hello World!');
 });
 
-app.post('/callback',(req, res) => {
-  console.log(req);
-  res.send('hello from call back');
+app.post('/webhook', line.middleware(lineConfig), (req, res, next) => {
+    res.status(200);
+    console.log(req.body);
 });
 
 // app.post('/callback', function(req, res){
@@ -24,23 +34,23 @@ app.post('/callback',(req, res) => {
 //       // ぐるなびAPI
 //       function(callback) {
 
-//           var json = req.body;
+//           const json = req.body;
 
 //           // 受信テキスト
-//           var search_place = json['result'][0]['content']['text'];
-//           var search_place_array = search_place.split("\n");
+//           const search_place = json['result'][0]['content']['text'];
+//           const search_place_array = search_place.split("\n");
 
 //           //検索キーワード
-//           var gnavi_keyword = "";
+//           const gnavi_keyword = "";
 //           if(search_place_array.length == 2){
-//               var keyword_array = search_place_array[1].split("、");
+//               const keyword_array = search_place_array[1].split("、");
 //               gnavi_keyword = keyword_array.join();
 //           }
 
 //           // ぐるなびAPI レストラン検索API
-//           var gnavi_url = 'http://api.gnavi.co.jp/RestSearchAPI/20150630/';
+//           const gnavi_url = 'http://api.gnavi.co.jp/RestSearchAPI/20150630/';
 //           // ぐるなび リクエストパラメータの設定
-//           var gnavi_query = {
+//           const gnavi_query = {
 //               "keyid":"<ぐるなびのアクセスキー>",
 //               "format": "json",
 //               "address": search_place_array[0],
@@ -48,7 +58,7 @@ app.post('/callback',(req, res) => {
 //               "freeword": gnavi_keyword,
 //               "freeword_condition": 2
 //           };
-//           var gnavi_options = {
+//           const gnavi_options = {
 //               url: gnavi_url,
 //               headers : {'Content-Type' : 'application/json; charset=UTF-8'},
 //               qs: gnavi_query,
@@ -56,7 +66,7 @@ app.post('/callback',(req, res) => {
 //           };
 
 //           // 検索結果をオブジェクト化
-//           var search_result = {};
+//           const search_result = {};
 
 //           request.get(gnavi_options, function (error, response, body) {
 //               if (!error && response.statusCode == 200) {
@@ -107,7 +117,7 @@ app.post('/callback',(req, res) => {
 //       }
 
 //       //ヘッダーを定義
-//       var headers = {
+//       const headers = {
 //           'Content-Type' : 'application/json; charset=UTF-8',
 //           'X-Line-ChannelID' : '<Your Channel ID>',
 //           'X-Line-ChannelSecret' : '<Your Channel Secret>',
@@ -115,12 +125,12 @@ app.post('/callback',(req, res) => {
 //       };
 
 //       // 送信相手の設定（配列）
-//       var to_array = [];
+//       const to_array = [];
 //       to_array.push(json['result'][0]['content']['from']);
 
 
 //       // 送信データ作成
-//       var data = {
+//       const data = {
 //           'to': to_array,
 //           'toChannel': 1383378250, //固定
 //           'eventType':'140177271400161403', //固定
@@ -153,7 +163,7 @@ app.post('/callback',(req, res) => {
 //       };
 
 //       //オプションを定義
-//       var options = {
+//       const options = {
 //           url: 'https://trialbot-api.line.me/v1/events',
 //           proxy : process.env.FIXIE_URL,
 //           headers: headers,

@@ -22,24 +22,29 @@ server.use(logger('dev'));
 
 server.post('/webhook', line.middleware(lineConfig), (req, res, next) => {
     res.sendStatus(200);
-    let events_processed = [];
-
-    req.body.events.forEach((event) => {
-        if (event.type == "message" && event.message.type == "text"){
-            if (event.message.text == "こんにちは"){
-                events_processed.push(bot.replyMessage(event.replyToken, {
-                    type: "text",
-                    text: "これはこれは"
-                }));
-            }
-        }
-    });
-    Promise.all(events_processed).then(
-        (response) => {
-            console.log(`${response.length} event(s) processed.`);
-        }
-    );
+    console.log(req.body);
 });
+
+// server.post('/webhook', line.middleware(lineConfig), (req, res, next) => {
+//     res.sendStatus(200);
+//     let events_processed = [];
+
+//     req.body.events.forEach((event) => {
+//         if (event.type == "message" && event.message.type == "text"){
+//             if (event.message.text == "こんにちは"){
+//                 events_processed.push(bot.replyMessage(event.replyToken, {
+//                     type: "text",
+//                     text: "これはこれは"
+//                 }));
+//             }
+//         }
+//     });
+//     Promise.all(events_processed).then(
+//         (response) => {
+//             console.log(`${response.length} event(s) processed.`);
+//         }
+//     );
+// });
 
 server.get('/ping', function(request, response) {
     response.send('pong!');

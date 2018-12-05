@@ -1,5 +1,5 @@
 const express = require('express');
-const app = express();
+const server = express();
 const bodyParser = require('body-parser');
 const request = require('request');
 const async = require('async');
@@ -14,21 +14,38 @@ const lineConfig = {
     channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
     channelSecret: process.env.LINE_CHANNEL_SECRET
 };
+const bot = new line.Client(lineConfig);
 
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json());
-app.use(logger('dev'));
+server.use(bodyParser.urlencoded({extended: true}));
+server.use(bodyParser.json());
+server.use(logger('dev'));
 
-app.get('/', function(request, response) {
-    response.send('Hello World!');
+server.post('/webhook', line.middleware(lineConfig), (req, res, next) => {
+    res.sendStatus(200);
+    let events_processed = [];
+
+    req.body.events.forEach((event) => {
+        if (event.type == "message" && event.message.type == "text"){
+            if (event.message.text == "こんにちは"){
+                events_processed.push(bot.replyMessage(event.replyToken, {
+                    type: "text",
+                    text: "これはこれは"
+                }));
+            }
+        }
+    });
+    Promise.all(events_processed).then(
+        (response) => {
+            console.log(`${response.length} event(s) processed.`);
+        }
+    );
 });
 
-app.post('/webhook', line.middleware(lineConfig), (req, res, next) => {
-    res.status(200);
-    console.log(req.body);
+server.get('/ping', function(request, response) {
+    response.send('pong!');
 });
 
-// app.post('/callback', function(req, res){
+// server.post('/callback', function(req, res){
 
 //   async.waterfall([
 //       // ぐるなびAPI
@@ -60,7 +77,7 @@ app.post('/webhook', line.middleware(lineConfig), (req, res, next) => {
 //           };
 //           const gnavi_options = {
 //               url: gnavi_url,
-//               headers : {'Content-Type' : 'application/json; charset=UTF-8'},
+//               headers : {'Content-Type' : 'serverlication/json; charset=UTF-8'},
 //               qs: gnavi_query,
 //               json: true
 //           };
@@ -118,7 +135,7 @@ app.post('/webhook', line.middleware(lineConfig), (req, res, next) => {
 
 //       //ヘッダーを定義
 //       const headers = {
-//           'Content-Type' : 'application/json; charset=UTF-8',
+//           'Content-Type' : 'serverlication/json; charset=UTF-8',
 //           'X-Line-ChannelID' : '<Your Channel ID>',
 //           'X-Line-ChannelSecret' : '<Your Channel Secret>',
 //           'X-Line-Trusted-User-With-ACL' : '<Your MID>'
@@ -183,6 +200,6 @@ app.post('/webhook', line.middleware(lineConfig), (req, res, next) => {
 
 // });
 
-app.listen(process.env.PORT || 8080, function() {
-    console.log('Node app is running on port :: ' + process.env.PORT || 8080);
+server.listen(process.env.PORT || 8080, function() {
+    console.log('Node server is running on port :: ' + process.env.PORT || 8080);
 });

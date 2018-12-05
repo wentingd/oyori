@@ -24,6 +24,17 @@ app.post('/webhook', line.middleware(lineConfig), (req, res, next) => {
     console.log(req.body);
 });
 
+app.use((err, req, res, next) => {
+    if (err instanceof SignatureValidationFailed) {
+        res.status(401).send(err.signature)
+        return
+    } else if (err instanceof JSONParseError) {
+        res.status(400).send(err.raw)
+        return
+    }
+    next(err);
+});
+
 // app.post('/webhook', line.middleware(lineConfig), (req, res, next) => {
 //     res.sendStatus(200);
 //     let events_processed = [];

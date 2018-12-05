@@ -69,7 +69,10 @@ const app = express();
 app.post('/callback', line.middleware(config), (req, res) => {
   Promise
     .all(req.body.events.map(handleEvent))
-    .then((result) => res.statusCode(200).json(result))
+    .then((result) => {
+        console.log(result);
+        res.statusCode(200);
+    })
     .catch((err) => {
       console.error(err);
       res.status(500).end();

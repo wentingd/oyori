@@ -20,8 +20,8 @@ app.use(bodyParser.json());
 app.use(logger('dev'));
 
 app.post('/webhook', line.middleware(lineConfig), (req, res, next) => {
-    res.status(200).json('success');
     console.log(req.body);
+    res.status(200).json('success');
 });
 
 app.use((err, req, res, next) => {

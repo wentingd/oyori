@@ -42,20 +42,20 @@ function handleEvent(event) {
 
 function constructReplyMessage(msgType){
     switch (msgType) {
-        case 'mtext':
-            return { type: 'text', text: event.message.text };
+        case 'text':
+            return { type: 'text', text: 'You said :' + event.message.text };
             break;
         case 'image':
             return { type: 'text', text: '何の写真ですか?' };
             break;
         case 'sticker':
-            return { type: 'text', text: 'かわいいです。' };
+            return { type: 'sticker', stickerId: '52114115' };
             break;
         case 'video':
-            return { type: 'text', text: 'すみません、動くものはまだ...' };
+            return { type: 'text', text: 'すみません、動くものはまだよくわからないのです...' };
             break;
         default:
-            return { type: 'text', text: 'これは、私がまだ知らない何かですね。' };
+            return { type: 'text', text: '私がまだ知らない何かですね。' };
     }
 }
 

@@ -46,10 +46,10 @@ function constructReplyMessage(msgType){
             return { type: 'text', text: 'You said :' + event.message.text };
             break;
         case 'image':
-            return { type: 'text', text: '何の写真ですか?' };
+            return { type: 'text', text: 'これは何の写真なんだろう?' };
             break;
         case 'sticker':
-            return { type: 'sticker', stickerId: '52114115' };
+            return { type: 'sticker', packageId: '11539', stickerId: '52114115' };
             break;
         case 'video':
             return { type: 'text', text: 'すみません、動くものはまだよくわからないのです...' };

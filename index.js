@@ -40,6 +40,7 @@ function handleEvent(event) {
 }
 
 function constructReplyMessage(type){
+    console.log(type);
     switch (type) {
         case 'text':
             return { type: 'text', text: event.message.text };
@@ -47,11 +48,14 @@ function constructReplyMessage(type){
         case 'image':
             return { type: 'text', text: 'これは誰なんだろう?' };
             break;
+        case 'sticker':
+            return { type: 'text', text: 'かわいいです。' };
+            break;
         case 'video':
-            return { type: 'text', text: 'すみません、動くものはまだ…' };
+            return { type: 'text', text: 'すみません、動くものはまだ...' };
             break;
         default:
-            return { type: 'text', text: 'まだ知らないコンテンツですね。' };
+            return { type: 'text', text: '私がまだ知らないコンテンツですね。' };
     }
 }
 

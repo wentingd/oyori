@@ -3,6 +3,13 @@
 const line = require('@line/bot-sdk');
 const express = require('express');
 const app = express();
+const bodyParser = require('body-parser');
+const request = require('request-promise');
+
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+app.use(bodyParser.json());
 
 if (process.env.NODE_ENV !== 'production'){
     require('dotenv').config();
@@ -31,6 +38,11 @@ app.get('/', (req, res) => {
     res.send('Hello oyori');
 });
 
+app.post('/dev', (req, res) => {
+    let reply = constructReplyMessage('text', req.body.message);
+    res.status(200).send(reply);
+});
+
 function handleEvent(event) {
     let reply = { type: 'text' };
     if (!event.type || event.type !== 'message') {
@@ -40,10 +52,10 @@ function handleEvent(event) {
     }   
 }
 
-function constructReplyMessage(msgType, msgText){
+const constructReplyMessage = (msgType, msgText) => {
     switch (msgType) {
         case 'text':
-            return { type: 'text', text: 'You said :' + msgText };
+            return { type: 'text', text: giveRecommendation(msgText) };
             break;
         case 'image':
             return { type: 'text', text: 'これは何の写真なんだろう?' };
@@ -57,6 +69,24 @@ function constructReplyMessage(msgType, msgText){
         default:
             return { type: 'text', text: '私がまだ知らない何かですね。' };
     }
+}
+
+const giveRecommendation = (msgText) => {
+    const keywords = msgText.split(' ');
+    let type = keywords[0];
+    let text = keywords[1];
+    if (text.indexOf('lord') > -1) {
+        text = 'other,you,control,get,+1';
+    }
+    return fetchResultFromApi('cards?type=' + type + '&text=' + text).then(result => result);
+}
+
+const fetchResultFromApi = async (param) => {
+    const mtgApiUri = process.env.MTG_API_BASE_URI;
+    const recommendation = await request({ uri: mtgApiUri + param, json: true })
+        .then(response => response.cards ? response.cards[0].name : '')
+        .catch(err => '');
+    return recommendation;
 }
 
 const port = process.env.PORT || 8080;

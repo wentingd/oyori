@@ -33,20 +33,20 @@ app.get('/', (req, res) => {
 
 function handleEvent(event) {
     let reply = { type: 'text' };
-    if (!event) {
+    if (!event.type || event.type !== 'message') {
         return Promise.resolve(null);
-    }
-    client.replyMessage(event.replyToken, constructReplyMessage(event.type));
+    } else {
+        client.replyMessage(event.replyToken, constructReplyMessage(event.message.type));
+    }   
 }
 
-function constructReplyMessage(type){
-    console.log(type);
-    switch (type) {
-        case 'text':
+function constructReplyMessage(msgType){
+    switch (msgType) {
+        case 'mtext':
             return { type: 'text', text: event.message.text };
             break;
         case 'image':
-            return { type: 'text', text: 'これは誰なんだろう?' };
+            return { type: 'text', text: '何の写真ですか?' };
             break;
         case 'sticker':
             return { type: 'text', text: 'かわいいです。' };
@@ -55,7 +55,7 @@ function constructReplyMessage(type){
             return { type: 'text', text: 'すみません、動くものはまだ...' };
             break;
         default:
-            return { type: 'text', text: '私がまだ知らないコンテンツですね。' };
+            return { type: 'text', text: 'これは、私がまだ知らない何かですね。' };
     }
 }
 

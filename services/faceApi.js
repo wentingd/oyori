@@ -3,7 +3,7 @@ const request = require('request-promise');
 require('dotenv').config();
 
 const apiBaseUri = process.env.AZURE_FACE_API_URI;
-const groupName = process.env.GROUP_NAME;
+const groupName = process.env.AZURE_PERSON_GROUP_NAME;
 
 const makeRequest = (options) => {
     return request({

@@ -3,10 +3,9 @@
 const line = require('@line/bot-sdk');
 const express = require('express');
 const bodyParser = require('body-parser');
-const morgan = require('morgan');
-const faceApi = require('./services/faceApi');
-const mtgApi = require('./services/mtgApi');
 const request = require('request-promise');
+const morgan = require('morgan');
+const faceApi = require('./route/faceApi');
 
 if (process.env.NODE_ENV !== 'production'){
     require('dotenv').config();
@@ -26,6 +25,16 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
+app.post('/mock/text', (req, res) => {
+    const events = [{type: 'message', message: { type: 'text', text: req.body.message}}];
+    Promise
+        .all(events.map(handleEvent))
+        .then(result => {
+            res.status(200).send(result.data.messages)
+        })
+        .catch(err => res.status(500).send('error'))
+});
+
 app.post('/callback', line.middleware(config), (req, res) => {
   Promise
     .all(req.body.events.map(handleEvent))
@@ -34,19 +43,6 @@ app.post('/callback', line.middleware(config), (req, res) => {
       console.error('Err in POST /callback :: ' + err);
       res.status(500).end();
     });
-});
-
-app.post('/mock/text', (req, res) => {
-    const events = [{type: 'message', message: { type: 'text', text: req.body.message}}];
-    Promise
-        .all(events.map(event => mtgApi.getCardRecommendation(event.message.text)))
-        .then(result => {
-            res.status(200).send(result)
-        })
-        .catch(err => {
-            console.log(err)
-            res.status(500).send('error')
-        })
 });
 
 function handleEvent(event) {
@@ -63,7 +59,7 @@ function handleEvent(event) {
 const constructReplyMessage = async (msgType, msgText) => {
     switch (msgType) {
         case 'text':
-            return { type: 'text', text: await getCardRecommendation(msgText) };
+            return { type: 'text', text: await giveCardRecommendation(msgText) };
             break;
         case 'image':
             return { type: 'text', text: 'これは何の写真なんだろう?' };
@@ -79,18 +75,7 @@ const constructReplyMessage = async (msgType, msgText) => {
     }
 }
 
-const getFirstCardWithParam = async (param) => {
-    console.log(param)
-    const mtgApiUri = process.env.MTG_API_BASE_URI;
-    let result = await request({ uri: mtgApiUri + param, json: true })
-        .then(response => response.cards[0] ? response.cards[0].name : '')
-        .catch(err => console.log(err));
-    if (!result) return 'sorry, no result found';
-    return result;
-}
-
-const getCardRecommendation = async (msgText) => {
-    console.log(msgText)
+const giveCardRecommendation = async (msgText) => {
     const keywords = msgText.split(' ');
     let type = keywords[0];
     let text = keywords[1];
@@ -100,6 +85,15 @@ const getCardRecommendation = async (msgText) => {
     let recommendation = await getFirstCardWithParam('cards?type=' + type + '&text=' + text);
     if (!recommendation) return 'sorry, no result found';
     return recommendation;
+}
+
+const getFirstCardWithParam = async (param) => {
+    const mtgApiUri = process.env.MTG_API_BASE_URI;
+    let result = await request({ uri: mtgApiUri + param, json: true })
+        .then(response => response.cards[0] ? response.cards[0].name : '')
+        .catch(err => console.log(err));
+    if (!result) return 'sorry, no result found';
+    return result;
 }
 
 const port = process.env.PORT || 3000;

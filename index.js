@@ -22,15 +22,33 @@ const config = {
 
 const client = new line.Client(config);
 
+// app.post('/webhook', line.middleware(config), (req, res) => {
+//     Promise
+//         .all(req.body.events.map(handleEvent))
+//         .then(reply => res.status(200).json(reply))
+//         .catch(err => {
+//             console.error(err);
+//             res.status(500).end();
+//         });
+// });
+
 app.post('/webhook', line.middleware(config), (req, res) => {
     Promise
-        .all(req.body.events.map(handleEvent))
-        .then(reply => res.status(200).json(reply))
-        .catch(err => {
-            console.error(err);
-            res.status(500).end();
-        });
-});
+      .all(req.body.events.map(handleEvent))
+      .then((result) => res.json(result))
+      .catch((err) => {
+          console.error(err);
+          res.status(500).end();
+      });
+  });
+
+function handleEvent(event) {
+    if (event.type !== 'message' || event.message.type !== 'text') {
+        return Promise.resolve(null);
+    }
+    const echo = { type: 'text', text: event.message.text };
+    return client.replyMessage(event.replyToken, echo);
+}
 
 app.get('/', (req, res) => {
     res.send('Hello oyori');
@@ -46,17 +64,17 @@ app.get('/', (req, res) => {
 //         .catch(err => res.status(500).send('error'))
 // });
 
-function handleEvent (event) {
-    if (event.type !== 'message') {
-        return Promise.resolve(null);
-    } else {
-        const echo = { type: 'text', text: event.message.text };
-        return client.replyMessage(event.replyToken, echo);
-        // return constructReplyMessage(event.message.type, event.message.text)
-        //     .then(reply => client.replyMessage(event.replyToken, reply))
-        //     .catch(err => {console.log(err)})
-    }
-}
+// function handleEvent (event) {
+//     if (event.type !== 'message') {
+//         return Promise.resolve(null);
+//     } else {
+//         const echo = { type: 'text', text: event.message.text };
+//         return client.replyMessage(event.replyToken, echo);
+//         return constructReplyMessage(event.message.type, event.message.text)
+//             .then(reply => client.replyMessage(event.replyToken, reply))
+//             .catch(err => {console.log(err)})
+//     }
+// }
 
 // const constructReplyMessage = async (msgType, msgText) => {
 //     switch (msgType) {

@@ -5,6 +5,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request-promise');
 const morgan = require('morgan');
+const faceApi = require('./route/faceApi');
 
 if (process.env.NODE_ENV !== 'production'){
     require('dotenv').config();
@@ -50,6 +51,7 @@ function handleEvent(event) {
   }
   return constructReplyMessage(event.message.type, event.message.text)
     .then(reply => {
+        console.log(reply)
         client.replyMessage(event.replyToken, reply)
     })
     .catch(err => {console.error('Err in handleEvent :: ' + err);})
@@ -58,7 +60,7 @@ function handleEvent(event) {
 const constructReplyMessage = async (msgType, msgText) => {
     switch (msgType) {
         case 'text':
-            return { type: 'text', text: await giveCardRecommendation(msgText) };
+            return { type: 'text', text: await giveRecommendation(msgText) };
             break;
         case 'image':
             return { type: 'text', text: 'これは何の写真なんだろう?' };
@@ -74,15 +76,15 @@ const constructReplyMessage = async (msgType, msgText) => {
     }
 }
 
-const giveCardRecommendation = async (msgText) => {
+const giveRecommendation = async (msgText) => {
     const keywords = msgText.split(' ');
     let type = keywords[0];
     let text = keywords[1];
-    if (text && text.indexOf('lord') > -1) {
+    if (text.indexOf('lord') > -1) {
         text = 'other,you,control,get,+1';
     }
     let recommendation = await getFirstCardWithParam('cards?type=' + type + '&text=' + text);
-    if (!recommendation) return 'sorry, no result found';
+    if (!recommendation) return 'sorry, no result found'
     return recommendation;
 }
 
@@ -94,6 +96,8 @@ const getFirstCardWithParam = async (param) => {
     if (!result) return 'sorry, no result found';
     return result;
 }
+
+const recognizeFaceFromUrl = faceApi.recognizeFaceFromUrl;
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

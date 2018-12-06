@@ -25,7 +25,9 @@ const client = new line.Client(config);
 app.post('/webhook', line.middleware(config), (req, res) => {
   Promise
     .all(req.body.events.map(handleEvent))
-    .then(reply => res.status(200).send(reply))
+    .then(reply => {
+        res.status(200).send(reply)
+    })
     .catch(err => {
         console.error(err);
         res.status(500).send('すみません、ちょっと問題があったようです…');
@@ -40,7 +42,10 @@ app.post('/mock/text', (req, res) => {
     const events = [{type: 'message', message: { type: 'text', text: req.body.message}}];
     Promise
         .all(events.map(handleEvent))
-        .then(reply => res.status(200).send(reply))
+        .then(reply => {
+            res.status(200).send(reply)
+        })
+        .catch(err => console.log(err))
 });
 
 const handleEvent = (event) => {

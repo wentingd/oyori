@@ -82,13 +82,7 @@ const giveRecommendation = async (msgText) => {
     if (text.indexOf('lord') > -1) {
         text = 'other,you,control,get,+1';
     }
-<<<<<<< HEAD
-    let recommendation = await getFirstCardWithParam('cards?type=' + type + '&text=' + text);
-    if (!recommendation) return 'sorry, no result found'
-    return recommendation;
-=======
     return await getFirstCardWithParam('cards?type=' + type + '&text=' + text);
->>>>>>> parent of e625bf1... return something when empty
 }
 
 const getFirstCardWithParam = async (param) => {

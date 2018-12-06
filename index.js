@@ -25,10 +25,10 @@ const client = new line.Client(config);
 app.post('/webhook', line.middleware(config), (req, res) => {
   Promise
     .all(req.body.events.map(handleEvent))
-    .then(reply => {
-        res.status(200).send(reply)
+    .then((reply) => {
+        res.status(200).json(reply)
     })
-    .catch(err => {
+    .catch((err) => {
         console.error(err);
         res.status(500).send('すみません、ちょっと問題があったようです…');
     });
@@ -38,24 +38,24 @@ app.get('/', (req, res) => {
     res.send('Hello oyori');
 });
 
-app.post('/mock/text', (req, res) => {
-    const events = [{type: 'message', message: { type: 'text', text: req.body.message}}];
-    Promise
-        .all(events.map(handleEvent))
-        .then(reply => {
-            res.status(200).send(reply)
-        })
-        .catch(err => console.log(err))
-});
+// app.post('/mock/text', (req, res) => {
+//     const events = [{type: 'message', message: { type: 'text', text: req.body.message}}];
+//     Promise
+//         .all(events.map(handleEvent))
+//         .then(result => {
+//             res.status(200).json(result.data.messages)
+//         })
+//         .catch(err => res.status(500).send('error'))
+// });
 
 const handleEvent = (event) => {
     if (!event.type || event.type !== 'message') {
         return Promise.resolve(null);
     } else {
-        return { type: 'text', text: 'debugging' }
-        // return constructReplyMessage(event.message.type, event.message.text)
-        //     .then(reply => reply)
-        //     .catch(err => {console.log(err)})
+        // return client.replyMessage(event.replyToken, 'debugging');
+        return constructReplyMessage(event.message.type, event.message.text)
+            .then(reply => client.replyMessage(event.replyToken, reply))
+            .catch(err => {console.log(err)})
     }
 }
 

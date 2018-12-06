@@ -142,7 +142,7 @@ app.post('/callback', line.middleware(config), (req, res) => {
 });
 
 function handleEvent(event) {
-  if (event.type !== 'message' || event.message.type !== 'text') {
+  if (event.type !== 'message') {
     return Promise.resolve(null);
   }
   return constructReplyMessage(event.message.type, event.message.text)

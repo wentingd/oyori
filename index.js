@@ -44,7 +44,7 @@ app.post('/mock/text', (req, res) => {
     Promise
         .all(events.map(handleEvent))
         .then(result => {
-            res.status(200).json(result.data.messages)
+            res.status(200).send(result.data.messages)
         })
         .catch(err => res.status(500).send('error'))
 });

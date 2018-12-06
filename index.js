@@ -52,10 +52,10 @@ const handleEvent = (event) => {
     if (!event.type || event.type !== 'message') {
         return Promise.resolve(null);
     } else {
-        // return client.replyMessage(event.replyToken, 'debugging');
-        return constructReplyMessage(event.message.type, event.message.text)
-            .then(reply => client.replyMessage(event.replyToken, reply))
-            .catch(err => {console.log(err)})
+        return client.replyMessage(event.replyToken, 'debugging');
+        // return constructReplyMessage(event.message.type, event.message.text)
+        //     .then(reply => client.replyMessage(event.replyToken, reply))
+        //     .catch(err => {console.log(err)})
     }
 }
 

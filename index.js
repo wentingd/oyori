@@ -25,12 +25,10 @@ const client = new line.Client(config);
 app.post('/webhook', line.middleware(config), (req, res) => {
   Promise
     .all(req.body.events.map(handleEvent))
-    .then((reply) => {
-        res.status(200).send(reply);
-    })
-    .catch((err) => {
+    .then(reply => res.status(200).send(reply))
+    .catch(err => {
         console.error(err);
-        res.status(500).end();
+        res.status(500).send('すみません、ちょっと問題があったようです…');
     });
 });
 
@@ -39,16 +37,13 @@ app.get('/', (req, res) => {
 });
 
 app.post('/mock/text', (req, res) => {
-    handleEvent({type: 'message', message: {
-        type: 'text',
-        text: req.body.message
-    }}).then(
-        reply => res.status(200).send(reply)
-    )
+    const events = [{type: 'message', message: { type: 'text', text: req.body.message}}];
+    Promise
+        .all(events.map(handleEvent))
+        .then(reply => res.status(200).send(reply))
 });
 
 const handleEvent = (event) => {
-    let reply = { type: 'text' };
     if (!event.type || event.type !== 'message') {
         return Promise.resolve(null);
     } else {

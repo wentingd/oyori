@@ -106,6 +106,7 @@ const line = require('@line/bot-sdk');
 const express = require('express');
 const request = require('request-promise');
 const morgan = require('morgan');
+const bodyParser = require('body-parser');
 
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
@@ -117,6 +118,18 @@ const client = new line.Client(config);
 const app = express();
 
 app.use(morgan('tiny'));
+// avoid using bodyParser on bot routes
+app.use('/mock', bodyParser.json());
+
+app.post('/mock', (req, res) => {
+    const events = [{type: 'message', message: { type: 'text', text: req.body.message}}];
+    Promise
+        .all(events.map(handleEvent))
+        .then(result => {
+            res.status(200).send(result.data.messages)
+        })
+        .catch(err => res.status(500).send('error'))
+});
 
 app.post('/callback', line.middleware(config), (req, res) => {
   Promise

@@ -26,7 +26,7 @@ app.post('/webhook', line.middleware(config), (req, res) => {
   Promise
     .all(req.body.events.map(handleEvent))
     .then((reply) => {
-        res.status(200).json(reply)
+        res.status(200).send(reply);
     })
     .catch((err) => {
         console.error(err);
@@ -49,6 +49,7 @@ app.get('/', (req, res) => {
 // });
 
 const handleEvent = (event) => {
+    console.log(event)
     if (!event.type || event.type !== 'message') {
         return Promise.resolve(null);
     } else {

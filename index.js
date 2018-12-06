@@ -25,8 +25,8 @@ const client = new line.Client(config);
 app.post('/webhook', line.middleware(config), (req, res) => {
   Promise
     .all(req.body.events.map(handleEvent))
-    .then((result) => {
-        res.status(200).send(result);
+    .then((reply) => {
+        res.status(200).send(reply);
     })
     .catch((err) => {
         console.error(err);
@@ -38,24 +38,30 @@ app.get('/', (req, res) => {
     res.send('Hello oyori');
 });
 
-app.post('/dev', (req, res) => {
-    let reply = constructReplyMessage('text', req.body.message);
-    res.status(200).send(reply);
+app.post('/mock/text', (req, res) => {
+    handleEvent({type: 'message', message: {
+        type: 'text',
+        text: req.body.message
+    }}).then(
+        reply => res.status(200).send(reply)
+    )
 });
 
-function handleEvent(event) {
+const handleEvent = (event) => {
     let reply = { type: 'text' };
     if (!event.type || event.type !== 'message') {
         return Promise.resolve(null);
     } else {
-        client.replyMessage(event.replyToken, constructReplyMessage(event.message.type, event.message.text));
-    }   
+        return constructReplyMessage(event.message.type, event.message.text)
+            .then(reply => reply)
+            .catch(err => {console.log(err)})
+    }
 }
 
-const constructReplyMessage = (msgType, msgText) => {
+const constructReplyMessage = async (msgType, msgText) => {
     switch (msgType) {
         case 'text':
-            return { type: 'text', text: giveRecommendation(msgText) };
+            return { type: 'text', text: await giveRecommendation(msgText) };
             break;
         case 'image':
             return { type: 'text', text: 'これは何の写真なんだろう?' };
@@ -71,22 +77,19 @@ const constructReplyMessage = (msgType, msgText) => {
     }
 }
 
-const giveRecommendation = (msgText) => {
+const giveRecommendation = async (msgText) => {
     const keywords = msgText.split(' ');
     let type = keywords[0];
     let text = keywords[1];
     if (text.indexOf('lord') > -1) {
         text = 'other,you,control,get,+1';
     }
-    return fetchResultFromApi('cards?type=' + type + '&text=' + text).then(result => result);
+    return await getFirstCardWithParam('cards?type=' + type + '&text=' + text);
 }
 
-const fetchResultFromApi = async (param) => {
+const getFirstCardWithParam = async (param) => {
     const mtgApiUri = process.env.MTG_API_BASE_URI;
-    const recommendation = await request({ uri: mtgApiUri + param, json: true })
-        .then(response => response.cards ? response.cards[0].name : '')
-        .catch(err => '');
-    return recommendation;
+    return await request({ uri: mtgApiUri + param, json: true }).then(response => response.cards ? response.cards[0].name : '')
 }
 
 const port = process.env.PORT || 8080;

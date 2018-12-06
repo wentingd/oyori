@@ -5,7 +5,7 @@ require('dotenv').config();
 const apiBaseUri = process.env.AZURE_FACE_API_URI;
 const groupName = process.env.GROUP_NAME;
 
-const make_request = (options) => {
+const makeRequest = (options) => {
     return request({
       headers: {
         'content-type': 'application/json',
@@ -30,7 +30,7 @@ const detectFace = (imgUrl) => {
         url: imgUrl
       }
     }
-    return make_request(options).then(response => validateResponse(response));
+    return makeRequest(options).then(response => validateResponse(response));
 }
 
 const identifyFace = (groupId, faceId) => {
@@ -43,7 +43,7 @@ const identifyFace = (groupId, faceId) => {
         'maxNumOfCandidatesReturned': 1
       }
     }
-    return make_request(options).then(response => validateResponse(response));
+    return makeRequest(options).then(response => validateResponse(response));
 }
   
 const getPerson = (groupId, faceId) => {
@@ -51,7 +51,7 @@ const getPerson = (groupId, faceId) => {
         method: 'GET',
         uri: apiBaseUri + 'persongroups/' + groupId + '/persons/' + faceId,
     }
-    return make_request(options).then(response => validateResponse(response));
+    return makeRequest(options).then(response => validateResponse(response));
 }
 
 const recognizeFaceFromUrl = async (imgUrl) => {

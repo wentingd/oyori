@@ -1,43 +1,11 @@
-// 'use strict';
-
-// const line = require('@line/bot-sdk');
-// const express = require('express');
-// const bodyParser = require('body-parser');
-// const request = require('request-promise');
-// const morgan = require('morgan');
-// const app = express();
-
-// const config = {
-//   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
-//   channelSecret: process.env.LINE_CHANNEL_SECRET,
-// };
-
-// const client = new line.Client(config);
-
-// app.use(morgan('tiny'));
-// app.use(bodyParser.urlencoded({
-//     extended: true
-// }));
-// app.use(bodyParser.json());
-
-// app.post('/mock/text', (req, res) => {
-//     const events = [{type: 'message', message: { type: 'text', text: req.body.message}}];
-//     Promise
-//         .all(events.map(handleEvent))
-//         .then(result => {
-//             res.status(200).send(result.data.messages)
-//         })
-//         .catch(err => res.status(500).send('error'))
-// });
-
-
 'use strict';
 
 const line = require('@line/bot-sdk');
 const express = require('express');
 const bodyParser = require('body-parser');
-const request = require('request-promise');
 const morgan = require('morgan');
+const faceApi = require('./services/faceApi');
+const mtgApi = require('./services/mtgApi');
 
 if (process.env.NODE_ENV !== 'production'){
     require('dotenv').config();
@@ -51,12 +19,31 @@ const client = new line.Client(config);
 
 const app = express();
 
+app.use(morgan('tiny'));
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+app.use(bodyParser.json());
+
+app.post('/mock/text', (req, res) => {
+    const events = [{type: 'message', message: { type: 'text', text: req.body.message}}];
+    Promise
+        .all(events.map(event => mtgApi.getCardRecommendation(event.message.text)))
+        .then(result => {
+            res.status(200).send(result)
+        })
+        .catch(err => {
+            console.log(err)
+            res.status(500).send('error')
+        })
+});
+
 app.post('/callback', line.middleware(config), (req, res) => {
   Promise
     .all(req.body.events.map(handleEvent))
     .then((result) => res.status(200).json(result))
     .catch((err) => {
-      console.error(err);
+      console.error('Err in POST /callback :: ' + err);
       res.status(500).end();
     });
 });
@@ -67,16 +54,15 @@ function handleEvent(event) {
   }
   return constructReplyMessage(event.message.type, event.message.text)
     .then(reply => {
-        console.log(reply)
         client.replyMessage(event.replyToken, reply)
     })
-    .catch(err => {console.log(err)})
+    .catch(err => {console.error('Err in handleEvent :: ' + err);})
 }
 
 const constructReplyMessage = async (msgType, msgText) => {
     switch (msgType) {
         case 'text':
-            return { type: 'text', text: await giveRecommendation(msgText) };
+            return { type: 'text', text: await mtgApi.getCardRecommendation(msgText) };
             break;
         case 'image':
             return { type: 'text', text: 'これは何の写真なんだろう?' };
@@ -90,23 +76,6 @@ const constructReplyMessage = async (msgType, msgText) => {
         default:
             return { type: 'text', text: '私がまだ知らない何かですね。' };
     }
-}
-
-const giveRecommendation = async (msgText) => {
-    const keywords = msgText.split(' ');
-    let type = keywords[0];
-    let text = keywords[1];
-    if (text.indexOf('lord') > -1) {
-        text = 'other,you,control,get,+1';
-    }
-    let recommendation = await getFirstCardWithParam('cards?type=' + type + '&text=' + text);
-    if (!recommendation) return 'sorry, no result was found'
-    return recommendation;
-}
-
-const getFirstCardWithParam = async (param) => {
-    const mtgApiUri = process.env.MTG_API_BASE_URI;
-    return await request({ uri: mtgApiUri + param, json: true }).then(response => response.cards[0] ? response.cards[0].name : '')
 }
 
 const port = process.env.PORT || 3000;

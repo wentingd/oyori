@@ -49,10 +49,11 @@ app.get('/', (req, res) => {
 // });
 
 function handleEvent (event) {
-    if (!event.type || event.type !== 'message') {
+    if (event.type !== 'message') {
         return Promise.resolve(null);
     } else {
-        return client.replyMessage(event.replyToken, 'debugging')
+        const echo = { type: 'text', text: event.message.text };
+        return client.replyMessage(event.replyToken, echo);
         // return constructReplyMessage(event.message.type, event.message.text)
         //     .then(reply => client.replyMessage(event.replyToken, reply))
         //     .catch(err => {console.log(err)})
@@ -96,5 +97,5 @@ function handleEvent (event) {
 const port = process.env.PORT || 8080;
 
 app.listen(port, () => {
-  console.log(`listening on ${port}`);
+    console.log(`listening on ${port}`);
 });

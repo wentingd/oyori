@@ -72,8 +72,6 @@ const config = {
 
 const client = new line.Client(config);
 
-const app = express();
-
 app.use(bodyParser.urlencoded({
     extended: true
 }));

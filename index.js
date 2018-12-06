@@ -104,6 +104,7 @@
 
 const line = require('@line/bot-sdk');
 const express = require('express');
+const request = require('request-promise');
 
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,

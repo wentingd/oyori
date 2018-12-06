@@ -2,9 +2,9 @@
 
 const line = require('@line/bot-sdk');
 const express = require('express');
-const app = express();
 const bodyParser = require('body-parser');
 const request = require('request-promise');
+const app = express();
 
 app.use(bodyParser.urlencoded({
     extended: true
@@ -23,16 +23,15 @@ const config = {
 const client = new line.Client(config);
 
 app.post('/webhook', line.middleware(config), (req, res) => {
-    console.log(req.body)
     Promise
-    .all(req.body.events.map(handleEvent))
-    .then((reply) => {
-        res.status(200).send(reply);
-    })
-    .catch((err) => {
-        console.error(err);
-        res.status(500).send('すみません、ちょっと問題があったようです…');
-    });
+        .all(req.body.events.map(handleEvent))
+        .then((reply) => {
+            res.status(200).send(reply);
+        })
+        .catch((err) => {
+            console.error(err);
+            res.status(500).send('すみません、ちょっと問題があったようです…');
+        });
 });
 
 app.get('/', (req, res) => {
@@ -49,7 +48,7 @@ app.get('/', (req, res) => {
 //         .catch(err => res.status(500).send('error'))
 // });
 
-const handleEvent = (event) => {
+function handleEvent (event) {
     if (!event.type || event.type !== 'message') {
         return Promise.resolve(null);
     } else {

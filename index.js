@@ -5,7 +5,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request-promise');
 const morgan = require('morgan');
-const faceApi = require('./route/faceApi');
 
 if (process.env.NODE_ENV !== 'production'){
     require('dotenv').config();
@@ -96,8 +95,6 @@ const getFirstCardWithParam = async (param) => {
     if (!result) return 'sorry, no result found';
     return result;
 }
-
-const recognizeFaceFromUrl = faceApi.recognizeFaceFromUrl;
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

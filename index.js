@@ -5,6 +5,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request-promise');
 const app = express();
+const client = new line.Client(config);
 
 app.use(bodyParser.urlencoded({
     extended: true
@@ -19,8 +20,6 @@ const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.LINE_CHANNEL_SECRET,
 };
-
-const client = new line.Client(config);
 
 // app.post('/webhook', line.middleware(config), (req, res) => {
 //     Promise

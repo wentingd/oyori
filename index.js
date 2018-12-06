@@ -5,21 +5,21 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request-promise');
 const app = express();
+
+if (process.env.NODE_ENV !== 'production'){
+    require('dotenv').config();
+};
+const config = {
+    channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+    channelSecret: process.env.LINE_CHANNEL_SECRET
+};
+
 const client = new line.Client(config);
 
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
-
-if (process.env.NODE_ENV !== 'production'){
-    require('dotenv').config();
-};
-
-const config = {
-  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
-  channelSecret: process.env.LINE_CHANNEL_SECRET,
-};
 
 // app.post('/webhook', line.middleware(config), (req, res) => {
 //     Promise

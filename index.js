@@ -23,6 +23,7 @@ const config = {
 const client = new line.Client(config);
 
 app.post('/webhook', line.middleware(config), (req, res) => {
+    console.log(req.body)
     Promise
     .all(req.body.events.map(handleEvent))
     .then((reply) => {

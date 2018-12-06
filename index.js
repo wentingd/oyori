@@ -1,59 +1,3 @@
-// // app.post('/mock/text', (req, res) => {
-// //     const events = [{type: 'message', message: { type: 'text', text: req.body.message}}];
-// //     Promise
-// //         .all(events.map(handleEvent))
-// //         .then(result => {
-// //             res.status(200).send(result.data.messages)
-// //         })
-// //         .catch(err => res.status(500).send('error'))
-// // });
-
-// // function handleEvent (event) {
-// //     if (event.type !== 'message') {
-// //         return Promise.resolve(null);
-// //     } else {
-// //         const echo = { type: 'text', text: event.message.text };
-// //         return client.replyMessage(event.replyToken, echo);
-// //         return constructReplyMessage(event.message.type, event.message.text)
-// //             .then(reply => client.replyMessage(event.replyToken, reply))
-// //             .catch(err => {console.log(err)})
-// //     }
-// // }
-
-// // const constructReplyMessage = async (msgType, msgText) => {
-// //     switch (msgType) {
-// //         case 'text':
-// //             return { type: 'text', text: await giveRecommendation(msgText) };
-// //             break;
-// //         case 'image':
-// //             return { type: 'text', text: 'これは何の写真なんだろう?' };
-// //             break;
-// //         case 'sticker':
-// //             return { type: 'sticker', packageId: '11539', stickerId: '52114115' };
-// //             break;
-// //         case 'video':
-// //             return { type: 'text', text: 'すみません、動くものはまだよくわからないのです...' };
-// //             break;
-// //         default:
-// //             return { type: 'text', text: '私がまだ知らない何かですね。' };
-// //     }
-// // }
-
-// // const giveRecommendation = async (msgText) => {
-// //     const keywords = msgText.split(' ');
-// //     let type = keywords[0];
-// //     let text = keywords[1];
-// //     if (text.indexOf('lord') > -1) {
-// //         text = 'other,you,control,get,+1';
-// //     }
-// //     return await getFirstCardWithParam('cards?type=' + type + '&text=' + text);
-// // }
-
-// // const getFirstCardWithParam = async (param) => {
-// //     const mtgApiUri = process.env.MTG_API_BASE_URI;
-// //     return await request({ uri: mtgApiUri + param, json: true }).then(response => response.cards ? response.cards[0].name : '')
-// // }
-
 'use strict';
 
 const line = require('@line/bot-sdk');
@@ -87,12 +31,72 @@ app.post('/callback', line.middleware(config), (req, res) => {
     });
 });
 
+app.post('/mock/text', (req, res) => {
+    const events = [{type: 'message', message: { type: 'text', text: req.body.message}}];
+    Promise
+        .all(events.map(handleEvent))
+        .then(result => {
+            res.status(200).send(result.data.messages)
+        })
+        .catch(err => res.status(500).send('error'))
+});
+
 function handleEvent(event) {
   if (event.type !== 'message') {
     return Promise.resolve(null);
   }
-  const echo = { type: 'text', text: event.message.text };
-  return client.replyMessage(event.replyToken, echo);
+//   const reply = { type: 'text', text: event.message.text };
+//   return client.replyMessage(event.replyToken, reply);
+  constructReplyMessage(event.message.type, event.message.text)
+    .then(reply => {
+        console.log(reply)
+        client.replyMessage(event.replyToken, reply)
+    })
+    .catch(err => {console.log(err)})
+}
+
+// function handleEvent (event) {
+//     if (event.type !== 'message') {
+//         return Promise.resolve(null);
+//     } else {
+//         return constructReplyMessage(event.message.type, event.message.text)
+//             .then(reply => client.replyMessage(event.replyToken, reply))
+//             .catch(err => {console.log(err)})
+//     }
+// }
+
+const constructReplyMessage = async (msgType, msgText) => {
+    switch (msgType) {
+        case 'text':
+            return { type: 'text', text: await giveRecommendation(msgText) };
+            break;
+        case 'image':
+            return { type: 'text', text: 'これは何の写真なんだろう?' };
+            break;
+        case 'sticker':
+            return { type: 'sticker', packageId: '11539', stickerId: '52114115' };
+            break;
+        case 'video':
+            return { type: 'text', text: 'すみません、動くものはまだよくわからないのです...' };
+            break;
+        default:
+            return { type: 'text', text: '私がまだ知らない何かですね。' };
+    }
+}
+
+const giveRecommendation = async (msgText) => {
+    const keywords = msgText.split(' ');
+    let type = keywords[0];
+    let text = keywords[1];
+    if (text.indexOf('lord') > -1) {
+        text = 'other,you,control,get,+1';
+    }
+    return await getFirstCardWithParam('cards?type=' + type + '&text=' + text);
+}
+
+const getFirstCardWithParam = async (param) => {
+    const mtgApiUri = process.env.MTG_API_BASE_URI;
+    return await request({ uri: mtgApiUri + param, json: true }).then(response => response.cards ? response.cards[0].name : '')
 }
 
 const port = process.env.PORT || 3000;

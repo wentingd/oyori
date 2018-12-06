@@ -1,40 +1,3 @@
-// app.use(bodyParser.urlencoded({
-//     extended: true
-// }));
-// app.use(bodyParser.json());
-
-// // app.post('/webhook', line.middleware(config), (req, res) => {
-// //     Promise
-// //         .all(req.body.events.map(handleEvent))
-// //         .then(reply => res.status(200).json(reply))
-// //         .catch(err => {
-// //             console.error(err);
-// //             res.status(500).end();
-// //         });
-// // });
-
-// app.post('/webhook', line.middleware(config), (req, res) => {
-//     Promise
-//       .all(req.body.events.map(handleEvent))
-//       .then((result) => res.json(result))
-//       .catch((err) => {
-//           console.error(err);
-//           res.status(500).end();
-//       });
-//   });
-
-// function handleEvent(event) {
-//     if (event.type !== 'message' || event.message.type !== 'text') {
-//         return Promise.resolve(null);
-//     }
-//     const echo = { type: 'text', text: event.message.text };
-//     return client.replyMessage(event.replyToken, echo);
-// }
-
-// app.get('/', (req, res) => {
-//     res.send('Hello oyori');
-// });
-
 // // app.post('/mock/text', (req, res) => {
 // //     const events = [{type: 'message', message: { type: 'text', text: req.body.message}}];
 // //     Promise
@@ -91,12 +54,6 @@
 // //     return await request({ uri: mtgApiUri + param, json: true }).then(response => response.cards ? response.cards[0].name : '')
 // // }
 
-// const port = process.env.PORT || 8080;
-
-// app.listen(port, () => {
-//     console.log(`listening on ${port}`);
-// });
-
 'use strict';
 
 const line = require('@line/bot-sdk');
@@ -116,6 +73,11 @@ const config = {
 const client = new line.Client(config);
 
 const app = express();
+
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+app.use(bodyParser.json());
 
 app.post('/callback', line.middleware(config), (req, res) => {
   Promise

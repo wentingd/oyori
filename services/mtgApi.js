@@ -1,8 +1,10 @@
 const request = require('request-promise');
 
+const mtgApiUri = process.env.MTG_API_BASE_URI;
+
 const getFirstCardWithParam = async (param) => {
     console.log(param)
-    const mtgApiUri = process.env.MTG_API_BASE_URI;
+    
     let result = await request({ uri: mtgApiUri + param, json: true })
         .then(response => response.cards[0] ? response.cards[0].name : '')
         .catch(err => console.log(err));

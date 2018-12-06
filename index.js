@@ -129,8 +129,12 @@ function handleEvent(event) {
   if (event.type !== 'message' || event.message.type !== 'text') {
     return Promise.resolve(null);
   }
-  const echo = { type: 'text', text: event.message.text };
-  return client.replyMessage(event.replyToken, echo);
+  return constructReplyMessage(event.message.type, event.message.text)
+    .then(reply => {
+        console.log(reply)
+        client.replyMessage(event.replyToken, reply);
+    })
+    .catch(err => {console.error('Err in handleEvent :: ' + err);})
 }
 
 const constructReplyMessage = async (msgType, msgText) => {

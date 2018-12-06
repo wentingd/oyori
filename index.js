@@ -99,7 +99,9 @@ const giveRecommendation = async (msgText) => {
     if (text.indexOf('lord') > -1) {
         text = 'other,you,control,get,+1';
     }
-    return await getFirstCardWithParam('cards?type=' + type + '&text=' + text);
+    let recommendation = await getFirstCardWithParam('cards?type=' + type + '&text=' + text);
+    if (!recommendation) return 'sorry, no result was found'
+    return recommendation;
 }
 
 const getFirstCardWithParam = async (param) => {

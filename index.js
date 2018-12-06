@@ -106,7 +106,6 @@ const line = require('@line/bot-sdk');
 const express = require('express');
 const request = require('request-promise');
 const morgan = require('morgan');
-const bodyParser = require('body-parser');
 
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
@@ -118,10 +117,6 @@ const client = new line.Client(config);
 const app = express();
 
 app.use(morgan('tiny'));
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
-app.use(bodyParser.json());
 
 app.post('/callback', line.middleware(config), (req, res) => {
   Promise

@@ -23,7 +23,7 @@ const config = {
 const client = new line.Client(config);
 
 app.post('/webhook', line.middleware(config), (req, res) => {
-  Promise
+    Promise
     .all(req.body.events.map(handleEvent))
     .then((reply) => {
         res.status(200).send(reply);
@@ -38,22 +38,22 @@ app.get('/', (req, res) => {
     res.send('Hello oyori');
 });
 
-// app.post('/mock/text', (req, res) => {
-//     const events = [{type: 'message', message: { type: 'text', text: req.body.message}}];
-//     Promise
-//         .all(events.map(handleEvent))
-//         .then(result => {
-//             res.status(200).json(result.data.messages)
-//         })
-//         .catch(err => res.status(500).send('error'))
-// });
+app.post('/mock/text', (req, res) => {
+    const events = [{type: 'message', message: { type: 'text', text: req.body.message}}];
+    Promise
+        .all(events.map(handleEvent))
+        .then(result => {
+            res.status(200).json(result.data.messages)
+        })
+        .catch(err => res.status(500).send('error'))
+});
 
 const handleEvent = (event) => {
     console.log(event)
     if (!event.type || event.type !== 'message') {
         return Promise.resolve(null);
     } else {
-        return client.replyMessage(event.replyToken, 'debugging');
+        client.replyMessage(event.replyToken, 'debugging');
         // return constructReplyMessage(event.message.type, event.message.text)
         //     .then(reply => client.replyMessage(event.replyToken, reply))
         //     .catch(err => {console.log(err)})

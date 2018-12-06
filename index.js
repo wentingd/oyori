@@ -7,6 +7,10 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mtgApi = require('./services/mtgApi');
 
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
+
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.LINE_CHANNEL_SECRET,
@@ -20,16 +24,6 @@ app.use(morgan('tiny'));
 // avoid using bodyParser on bot routes
 app.use('/mock', bodyParser.json());
 
-app.post('/mock', (req, res) => {
-    const events = [{type: 'message', message: { type: 'text', text: req.body.message}}];
-    Promise
-        .all(events.map(handleEvent))
-        .then(result => {
-            res.status(200).send(result.data.messages)
-        })
-        .catch(err => res.status(500).send('error'))
-});
-
 app.post('/callback', line.middleware(config), (req, res) => {
   Promise
     .all(req.body.events.map(handleEvent))
@@ -38,6 +32,16 @@ app.post('/callback', line.middleware(config), (req, res) => {
       console.error(err);
       res.status(500).end();
     });
+});
+
+app.post('/mock', (req, res) => {
+    const events = [req.body.message];
+    Promise
+        .all(events.map(mtgApi.getCardRecommendation))
+        .then(result => {
+            res.status(200).send(result)
+        })
+        .catch(err => res.status(500).send('error'))
 });
 
 function handleEvent(event) {
@@ -70,25 +74,6 @@ const constructReplyMessage = async (msgType, msgText) => {
             return { type: 'text', text: '私がまだ知らない何かですね。' };
     }
 }
-
-// const getCardRecommendation = async (msgText) => {
-//     const keywords = msgText.split(' ');
-//     let type = keywords[0];
-//     let text = keywords[1];
-//     if (text && text.indexOf('lord') > -1) {
-//         text = 'other,you,control,get,+1';
-//     }
-//     return await getFirstCardWithParam('cards?type=' + type + '&text=' + text);
-// }
-
-// const getFirstCardWithParam = async (param) => {
-//     const mtgApiUri = process.env.MTG_API_BASE_URI;
-//     let result = await request({ uri: mtgApiUri + param, json: true })
-//         .then(response => response.cards[0] ? response.cards[0].name : '')
-//         .catch(err => console.log(err));
-//     if (!result) return 'sorry, no result found';
-//     return result;
-// }
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

@@ -1,9 +1,12 @@
 const request = require('request-promise');
 
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config();
+}
+
 const mtgApiUri = process.env.MTG_API_BASE_URI;
 
 const getFirstCardWithParam = async (param) => {
-    console.log(param)
     let result = await request({ uri: mtgApiUri + param, json: true })
         .then(response => response.cards[0] ? response.cards[0].name : '')
         .catch(err => console.log(err));
@@ -12,7 +15,6 @@ const getFirstCardWithParam = async (param) => {
 }
 
 const getCardRecommendation = async (msgText) => {
-    console.log(msgText)
     const keywords = msgText.split(' ');
     let type = keywords[0];
     let text = keywords[1];

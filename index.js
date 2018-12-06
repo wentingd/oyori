@@ -1,21 +1,3 @@
-// 'use strict';
-
-// const line = require('@line/bot-sdk');
-// const express = require('express');
-// const bodyParser = require('body-parser');
-// const request = require('request-promise');
-// const app = express();
-
-// if (process.env.NODE_ENV !== 'production'){
-//     require('dotenv').config();
-// };
-// const config = {
-//     channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
-//     channelSecret: process.env.LINE_CHANNEL_SECRET
-// };
-
-// const client = new line.Client(config);
-
 // app.use(bodyParser.urlencoded({
 //     extended: true
 // }));
@@ -119,7 +101,13 @@
 
 const line = require('@line/bot-sdk');
 const express = require('express');
+const bodyParser = require('body-parser');
+const request = require('request-promise');
+const app = express();
 
+if (process.env.NODE_ENV !== 'production'){
+    require('dotenv').config();
+};
 const config = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.LINE_CHANNEL_SECRET,

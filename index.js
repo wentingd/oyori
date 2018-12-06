@@ -4,6 +4,7 @@ const line = require('@line/bot-sdk');
 const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request-promise');
+const morgan = require('morgan');
 const app = express();
 
 if (process.env.NODE_ENV !== 'production'){
@@ -16,6 +17,7 @@ const config = {
 
 const client = new line.Client(config);
 
+app.use(morgan('tiny'));
 app.use(bodyParser.urlencoded({
     extended: true
 }));
@@ -45,6 +47,7 @@ function handleEvent(event) {
   if (event.type !== 'message') {
     return Promise.resolve(null);
   }
+  console.log(event)
 //   const reply = { type: 'text', text: event.message.text };
 //   return client.replyMessage(event.replyToken, reply);
   constructReplyMessage(event.message.type, event.message.text)
@@ -66,6 +69,7 @@ function handleEvent(event) {
 // }
 
 const constructReplyMessage = async (msgType, msgText) => {
+    console.log('constructreply ::' + msgText)
     switch (msgType) {
         case 'text':
             return { type: 'text', text: await giveRecommendation(msgText) };
@@ -85,6 +89,7 @@ const constructReplyMessage = async (msgType, msgText) => {
 }
 
 const giveRecommendation = async (msgText) => {
+    console.log('constructreply ::' + msgText)
     const keywords = msgText.split(' ');
     let type = keywords[0];
     let text = keywords[1];
@@ -95,6 +100,7 @@ const giveRecommendation = async (msgText) => {
 }
 
 const getFirstCardWithParam = async (param) => {
+    console.log('constructreply ::' + param)
     const mtgApiUri = process.env.MTG_API_BASE_URI;
     return await request({ uri: mtgApiUri + param, json: true }).then(response => response.cards ? response.cards[0].name : '')
 }

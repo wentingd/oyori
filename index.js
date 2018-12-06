@@ -47,15 +47,14 @@ function handleEvent(event) {
   if (event.type !== 'message') {
     return Promise.resolve(null);
   }
-  console.log(event)
-//   const reply = { type: 'text', text: event.message.text };
-//   return client.replyMessage(event.replyToken, reply);
-  constructReplyMessage(event.message.type, event.message.text)
-    .then(reply => {
-        console.log(reply)
-        client.replyMessage(event.replyToken, reply)
-    })
-    .catch(err => {console.log(err)})
+  const reply = { type: 'text', text: event.message.text };
+  return client.replyMessage(event.replyToken, reply);
+//   constructReplyMessage(event.message.type, event.message.text)
+//     .then(reply => {
+//         console.log(reply)
+//         client.replyMessage(event.replyToken, reply)
+//     })
+//     .catch(err => {console.log(err)})
 }
 
 // function handleEvent (event) {

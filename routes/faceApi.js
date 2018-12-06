@@ -54,10 +54,8 @@ const getPerson = (groupId, faceId) => {
     return make_request(options).then(response => validateResponse(response));
 }
 
-
-
-const recognizeFaceFromUrl = (imgUrl) => {
-    detectFace(imgUrl)
+const recognizeFaceFromUrl = async (imgUrl) => {
+    await detectFace(imgUrl)
     .then(result => result[0].faceId)
     .then(detectedFaceId => {
         return identifyFace(groupName, detectedFaceId)

@@ -1,5 +1,63 @@
-const recognizeFaceFromUrl = () => {
-    detectFace('https://pbs.twimg.com/profile_images/752241396/takeshimeigen_400x400.jpg')
+const request = require('request-promise');
+
+require('dotenv').config();
+
+const apiBaseUri = process.env.AZURE_FACE_API_URI;
+const groupName = process.env.GROUP_NAME;
+
+const make_request = (options) => {
+    return request({
+      headers: {
+        'content-type': 'application/json',
+        'Ocp-Apim-Subscription-Key': process.env.AZURE_FACE_API_KEY1
+        },
+      json: true,
+      ...options
+    })
+    .then(response => {
+      return response;
+    })
+    .catch(err => {
+      return err;
+    });
+};
+
+const detectFace = (imgUrl) => {
+    let options = {
+      method: 'POST',
+      uri: apiBaseUri + 'detect?returnFaceId=true',
+      body: {
+        url: imgUrl
+      }
+    }
+    return make_request(options).then(response => validateResponse(response));
+}
+
+const identifyFace = (groupId, faceId) => {
+    let options = {
+      method: 'POST',
+      uri: apiBaseUri + 'identify',
+      body: {
+        'faceIds': [faceId],
+        'personGroupId': groupId,
+        'maxNumOfCandidatesReturned': 1
+      }
+    }
+    return make_request(options).then(response => validateResponse(response));
+}
+  
+const getPerson = (groupId, faceId) => {
+    let options = {
+        method: 'GET',
+        uri: apiBaseUri + 'persongroups/' + groupId + '/persons/' + faceId,
+    }
+    return make_request(options).then(response => validateResponse(response));
+}
+
+
+
+const recognizeFaceFromUrl = (imgUrl) => {
+    detectFace(imgUrl)
     .then(result => result[0].faceId)
     .then(detectedFaceId => {
         return identifyFace(groupName, detectedFaceId)
@@ -9,5 +67,7 @@ const recognizeFaceFromUrl = () => {
         return getPerson(groupName, identifiedFaceId)
         .then(result => result.name)
     })
-.catch(err => console.log(err));
-}
+    .catch(err => console.log(err));
+};
+
+module.exports = { recognizeFaceFromUrl };

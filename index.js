@@ -5,7 +5,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const request = require('request-promise');
 const morgan = require('morgan');
-const faceApi = require('./route/faceApi');
+const faceApi = require('./services/faceApi');
 
 if (process.env.NODE_ENV !== 'production'){
     require('dotenv').config();

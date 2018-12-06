@@ -47,7 +47,7 @@ const handleEvent = (event) => {
     if (!event.type || event.type !== 'message') {
         return Promise.resolve(null);
     } else {
-        return 'currently debugging'
+        return { type: 'text', text: 'debugging' }
         // return constructReplyMessage(event.message.type, event.message.text)
         //     .then(reply => reply)
         //     .catch(err => {console.log(err)})

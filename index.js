@@ -6,6 +6,7 @@ const request = require('request-promise');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mtgApi = require('./services/mtgApi');
+const faceApi = require('./services/faceApi');
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
@@ -48,31 +49,61 @@ function handleEvent(event) {
   if (event.type !== 'message') {
     return Promise.resolve(null);
   }
-  return constructReplyMessage(event.message.type, event.message.text)
+  return getReplyByMsgType(event.message)
     .then(reply => {
-        console.log(reply)
-        client.replyMessage(event.replyToken, reply);
+      client.replyMessage(event.replyToken, reply)
     })
     .catch(err => {console.error('Err in handleEvent :: ' + err);})
 }
 
-const constructReplyMessage = async (msgType, msgText) => {
-    switch (msgType) {
-        case 'text':
-            return { type: 'text', text: await mtgApi.getCardRecommendation(msgText) };
-            break;
-        case 'image':
-            return { type: 'text', text: 'これは何の写真なんだろう?' };
-            break;
-        case 'sticker':
-            return { type: 'sticker', packageId: '11539', stickerId: '52114115' };
-            break;
-        case 'video':
-            return { type: 'text', text: 'すみません、動くものはまだよくわからないのです...' };
-            break;
-        default:
-            return { type: 'text', text: '私がまだ知らない何かですね。' };
-    }
+const getReplyByMsgType = async (message) => {
+  switch (message.type) {
+      case 'text':
+          return await handleReply(message.text);
+          break;
+      case 'image':
+          return { type: 'text', text: 'I wonder what picture is this?' };
+          break;
+      case 'sticker':
+          return { type: 'sticker', packageId: '11539', stickerId: '52114115' };
+          break;
+      case 'video':
+          return { type: 'text', text: 'すみません、動くものはまだよくわからないのです...' };
+          break;
+      default:
+          return { type: 'text', text: '私がまだ知らない何かですね。' };
+  }
+};
+
+const handleReply = async (msgText) => {
+  if (msgText.indexOf('http') > -1) {
+    let personGuess = await faceApi.recognizeFaceFromUrl(msgText);
+    return composeSimpleReply(personGuess);
+  }
+  let cardGuess = await mtgApi.getCardRecommendation(msgText);
+  return composeRichReplyForMtgApi(cardGuess);
+};
+
+const composeSimpleReply = (replyText) => {
+  return { type: 'text', text: replyText }
+}
+
+const composeRichReplyForMtgApi = (cardName) => {
+  if (!cardName) return 'Sorry, nothing was found...'
+  return [{
+    "type": "template",
+    "altText": cardName,
+    "template": {
+      "type": "buttons",
+      "title": cardName,
+      "text": cardName,
+      "actions": [
+        {
+          "type": "uri",
+          "label": "Open on Wisdom Guild",
+          "uri": mtgApi.formatInfoUrl(cardName)
+        }]
+    }}]
 }
 
 const port = process.env.PORT || 3000;

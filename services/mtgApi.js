@@ -6,10 +6,9 @@ if (process.env.NODE_ENV !== 'production') {
 
 const mtgApiUri = process.env.MTG_API_BASE_URI;
 
-const getCardNamesWithParam = async (param) => {
-    console.log(param)
+const getCardsWithParam = async (param) => {
     const result = await request({ uri: mtgApiUri + param, json: true })
-        .then(response => response.cards.length > 0 ? response.cards.map(card => card.name).slice(0,5) : '')
+        .then(response => response.cards.length > 0 ? response.cards.slice(0,5) : '')
         .catch(err => console.log(err));
     if (!result) return '';
     return result;
@@ -26,8 +25,8 @@ const getCardRecommendations = async (userInput) => {
         type = keywords[0];
         ruleText = '';
     }
-    const recommendations = await getCardNamesWithParam('cards?type=' + type + '&text=' + ruleText);
-    if (!recommendations) return '';
+    const recommendations = await getCardsWithParam('cards?type=' + type + '&text=' + ruleText);
+    if (!recommendations) return [];
     return recommendations;
 }
 

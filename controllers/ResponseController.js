@@ -1,6 +1,8 @@
 const mtgApi = require('../services/mtgApi');
 const faceApi = require('../services/faceApi');
 const baseURL = process.env.BASE_URL;
+const natural = require('natural');
+const tokenizer = new natural.WordTokenizer();
 
 const handleText = async (message, source) => {
     const buttonsImageURL = `${baseURL}/static/buttons/1040.jpg`;
@@ -163,33 +165,36 @@ const handleText = async (message, source) => {
 }
 
 const getDefaultReply = async (message) => {
-    const { text } = message;
-    if (text.indexOf('http') > -1) {
-        const personGuess = await faceApi.recognizeFaceFromUrl(text);
-        return composeTextResponse(personGuess);
-    }
-    const cardGuesses = await mtgApi.getCardRecommendations(text);
-    return cardGuesses.map(cardName => composeRichReplyForMtgApi(cardName));
+  const { text } = message;
+  const tokens = tokenizer.tokenize(text);
+  console.log('tokenized :: ' + tokens);
+  if (text.indexOf('http') > -1) {
+      const personGuess = await faceApi.recognizeFaceFromUrl(text);
+      return composeTextResponse(personGuess);
+  }
+  const cardGuesses = await mtgApi.getCardRecommendations(text);
+  return cardGuesses.map(card => composeRichReplyForMtgApi(card));
 };
 
 const composeTextResponse = (textContent) => {
   return { type: 'text', text: textContent }
 };
 
-const composeRichReplyForMtgApi = (cardName) => {
-  if (!cardName) return {type: 'text', text: 'ごめん、有力なカード候補が見つかりません…'}
+const composeRichReplyForMtgApi = (card) => {
+  if (!card) return { type: 'text', text: 'ごめん、有力なカード候補が見つかりません…' };
   return {
-    "type": "template",
-    "altText": cardName,
-    "template": {
-      "type": "buttons",
-      "title": cardName,
-      "text": cardName,
-      "actions": [
+    type: 'template',
+    altText: card.name,
+    template: {
+      type: 'buttons',
+      thumbnailImageUrl: card.imageUrl,
+      title: card.name,
+      text: card.name,
+      actions: [
         {
-          "type": "uri",
-          "label": "Open on Wisdom Guild",
-          "uri": mtgApi.formatInfoUrl(cardName)
+          type: 'uri',
+          label: 'Open on Wisdom Guild',
+          uri: mtgApi.formatInfoUrl(card.name)
         }]
     }}
 };

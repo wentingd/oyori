@@ -167,8 +167,8 @@ const handleText = async (message, source) => {
 const getDefaultReply = async (message) => {
   const { text } = message;
   const tokens = tokenizer.tokenize(text);
-  console.log('tokenized :: ' + tokens);
-  if (text.indexOf('http') > -1) {
+  console.log(tokens);
+  if (tokens.includes('http')) {
       const personGuess = await faceApi.recognizeFaceFromUrl(text);
       return composeTextResponse(personGuess);
   }

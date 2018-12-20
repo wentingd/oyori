@@ -26,7 +26,7 @@ const getCardRecommendations = async (userInput) => {
         ruleText = '';
     }
     const recommendations = await getCardsWithParam('cards?type=' + type + '&text=' + ruleText);
-    if (!recommendations) return [];
+    if (!recommendations) return [''];
     return recommendations;
 }
 

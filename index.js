@@ -5,8 +5,7 @@ const express = require('express');
 const request = require('request-promise');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const mtgApi = require('./services/mtgApi');
-const faceApi = require('./services/faceApi');
+const { handleText, handleAudio, handleImage, handleSticker, handleVideo, handleLocation } = require('./controllers/ResponseController');
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
@@ -25,85 +24,102 @@ app.use(morgan('tiny'));
 // avoid using bodyParser on bot routes
 app.use('/mock', bodyParser.json());
 
+app.get('/callback', (req, res) => res.end(`I'm listening. Please access with POST.`));
+
+// webhook callback
 app.post('/callback', line.middleware(config), (req, res) => {
-  Promise
-    .all(req.body.events.map(handleEvent))
-    .then((result) => res.json(result))
+  if (req.body.destination) {
+    console.log("Destination User ID: " + req.body.destination);
+  }
+  if (!Array.isArray(req.body.events)) {
+    return res.status(500).end();
+  }
+  Promise.all(req.body.events.map(handleEvent))
+    .then(result => res.end())
     .catch((err) => {
       console.error(err);
       res.status(500).end();
     });
 });
 
+/* Sample req.body for testing mock
+{
+	"type": "message",
+	"message": { "type": "text", "text": "bye" },
+	"replyToken": "1111111"
+}
+*/
 app.post('/mock', (req, res) => {
-    const events = [req.body.message];
-    Promise
-        .all(events.map(mtgApi.getCardRecommendation))
-        .then(result => {
-            res.status(200).send(result)
-        })
-        .catch(err => res.status(500).send('error'))
+  const events = req.body;
+  Promise
+    .all(events.map(event => handleEvent(event)))
+    .then(result => res.status(200).send(result))
+    .catch(err => res.status(500).send('error'))
 });
 
-function handleEvent(event) {
-  if (event.type !== 'message') {
-    return Promise.resolve(null);
-  }
-  return getReplyByMsgType(event.message)
-    .then(reply => {
-      client.replyMessage(event.replyToken, reply)
-    })
-    .catch(err => {console.error('Err in handleEvent :: ' + err);})
-}
-
-const getReplyByMsgType = async (message) => {
-  switch (message.type) {
-      case 'text':
-          return await handleReply(message.text);
-          break;
-      case 'image':
-          return { type: 'text', text: 'I wonder what picture is this?' };
-          break;
-      case 'sticker':
-          return { type: 'sticker', packageId: '11539', stickerId: '52114115' };
-          break;
-      case 'video':
-          return { type: 'text', text: 'すみません、動くものはまだよくわからないのです...' };
-          break;
-      default:
-          return { type: 'text', text: '私がまだ知らない何かですね。' };
-  }
+const replyText = (client, token, texts) => {
+  console.log(texts)
+  // texts = Array.isArray(texts) ? texts : [texts];
+  // return client.replyMessage(
+  //   token,
+  //   texts.map((text) => ({ type: 'text', text }))
+  // );
+  client.replyMessage(
+    token,
+    texts
+  )
 };
 
-const handleReply = async (msgText) => {
-  if (msgText.indexOf('http') > -1) {
-    let personGuess = await faceApi.recognizeFaceFromUrl(msgText);
-    return composeSimpleReply(personGuess);
+async function handleEvent(event) {
+  if (event.replyToken && event.replyToken.match(/^(.)\1*$/)) {
+    console.log("Test hook recieved: " + JSON.stringify(event.message));
   }
-  let cardGuess = await mtgApi.getCardRecommendation(msgText);
-  return composeRichReplyForMtgApi(cardGuess);
-};
-
-const composeSimpleReply = (replyText) => {
-  return { type: 'text', text: replyText }
-}
-
-const composeRichReplyForMtgApi = (cardName) => {
-  if (!cardName) return 'Sorry, nothing was found...'
-  return [{
-    "type": "template",
-    "altText": cardName,
-    "template": {
-      "type": "buttons",
-      "title": cardName,
-      "text": cardName,
-      "actions": [
-        {
-          "type": "uri",
-          "label": "Open on Wisdom Guild",
-          "uri": mtgApi.formatInfoUrl(cardName)
-        }]
-    }}]
+  const eventType = event.type;
+  switch (event.type) {
+    case 'message':
+      const { message } = event;
+      switch (message.type) {
+        case 'text':
+          return replyText(client, event.replyToken, await handleText(message, event.source));
+          break;
+        case 'image':
+          return replyText(client, event.replyToken, await handleImage(message, event.source));
+          break;
+        case 'video':
+          return replyText(client, event.replyToken, await handleVideo(message, event.source));
+          break;
+        case 'audio':
+          return replyText(client, event.replyToken, await handleAudio(message, event.source));
+          break;
+        case 'location':
+          return replyText(client, event.replyToken, await handleLocation(message, event.source));
+          break;
+        case 'sticker':
+          return replyText(client, event.replyToken, await handleSticker(message, event.source));
+          break;
+        default:
+          throw new Error(`Unknown message: ${JSON.stringify(message)}`);
+          break;
+      }
+    // case 'follow':
+    //   return replyText(event.replyToken, 'Got followed event');
+    // case 'unfollow':
+    //   return console.log(`Unfollowed this bot: ${JSON.stringify(event)}`);
+    // case 'join':
+    //   return replyText(event.replyToken, `Joined ${event.source.type}`);
+    // case 'leave':
+    //   return console.log(`Left: ${JSON.stringify(event)}`);
+    // case 'postback':
+    //   let data = event.postback.data;
+    //   if (data === 'DATE' || data === 'TIME' || data === 'DATETIME') {
+    //     data += `(${JSON.stringify(event.postback.params)})`;
+    //   }
+    //   return replyText(event.replyToken, `Got postback: ${data}`);
+    // case 'beacon':
+    //   return replyText(event.replyToken, `Got beacon: ${event.beacon.hwid}`);
+    default:
+      throw new Error(`Unknown event type: ${JSON.stringify(eventType)}`);
+  }
 }
 
 const port = process.env.PORT || 3000;

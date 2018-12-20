@@ -5,19 +5,16 @@ const baseURL = process.env.BASE_URL;
 const handleText = async (message, source) => {
     const buttonsImageURL = `${baseURL}/static/buttons/1040.jpg`;
     switch (message.text) {
-    //   case 'profile':
-    //     if (source.userId) {
-    //       return client.getProfile(source.userId)
-    //         .then((profile) => replyText(
-    //           replyToken,
-    //           [
-    //             `Display name: ${profile.displayName}`,
-    //             `Status message: ${profile.statusMessage}`,
-    //           ]
-    //         ));
-    //     } else {
-    //       return replyText(replyToken, 'Bot can\'t use profile API without user ID');
-    //     }
+      case 'profile':
+        if (source.userId) {
+          return client.getProfile(source.userId)
+            .then((profile) => composeTextResponse([
+              `Display name: ${profile.displayName}`,
+              `Status message: ${profile.statusMessage}`,
+            ]));
+        } else {
+          return composeTextResponse('Bot can\'t use profile API without user ID');
+        }
       case 'buttons':
         return {
             type: 'template',
@@ -161,23 +158,27 @@ const handleText = async (message, source) => {
     //     }
       default:
         console.log(`[ResponseController.handleText] return with case default`);
-        return await composeReply(message);
+        return await getDefaultReply(message);
     }
 }
 
-const composeReply = async (message) => {
+const getDefaultReply = async (message) => {
     const { text } = message;
     if (text.indexOf('http') > -1) {
-        let personGuess = await faceApi.recognizeFaceFromUrl(text);
-        return { type: 'text', text: personGuess };
+        const personGuess = await faceApi.recognizeFaceFromUrl(text);
+        return composeTextResponse(personGuess);
     }
-    let cardGuess = await mtgApi.getCardRecommendation(text);
-    return composeRichReplyForMtgApi(cardGuess);
+    const cardGuesses = await mtgApi.getCardRecommendations(text);
+    return cardGuesses.map(cardName => composeRichReplyForMtgApi(cardName));
+};
+
+const composeTextResponse = (textContent) => {
+  return { type: 'text', text: textContent }
 };
 
 const composeRichReplyForMtgApi = (cardName) => {
-  if (!cardName) return {type: 'text', text: 'Sorry, no card was found...'}
-  return [{
+  if (!cardName) return {type: 'text', text: 'ごめん、有力なカード候補が見つかりません…'}
+  return {
     "type": "template",
     "altText": cardName,
     "template": {
@@ -190,34 +191,34 @@ const composeRichReplyForMtgApi = (cardName) => {
           "label": "Open on Wisdom Guild",
           "uri": mtgApi.formatInfoUrl(cardName)
         }]
-    }}]
-}
+    }}
+};
 
 const handleImage = (message, source) => {
-    return { type: 'text', text: 'I wonder what picture is this?' }
+  return composeTextResponse('I wonder what picture is this?');
 }
 
 const handleVideo = (message, source) => {
-    return { type: 'text', text: '面白い映像ですか? :)' }
+  return composeTextResponse('わ、面白い！');
 }
 
 const handleAudio = (message, source) => {
-    return { type: 'text', text: 'わ、何か歌を歌ってくれましたか?' }
+  return composeTextResponse('嬉しいけど、音声はまだ聞き取れないです><');
 }
 
 const handleLocation = (message, source) => {
-    return { type: 'text', text: '今そこにいるんですね！' }
+  return composeTextResponse('今そこにいるんですね。ちょっと待ってくださいー');
 }
 
 const handleSticker = (message, source) => {
-    return { type: 'sticker', packageId: '11539', stickerId: '52114115' }
+  return { type: 'sticker', packageId: '11539', stickerId: '52114115' }
 }
 
 module.exports = {
-    handleText,
-    handleAudio,
-    handleImage,
-    handleLocation,
-    handleSticker,
-    handleVideo
+  handleText,
+  handleAudio,
+  handleImage,
+  handleLocation,
+  handleSticker,
+  handleVideo
 };

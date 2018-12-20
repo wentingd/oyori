@@ -6,6 +6,7 @@ const request = require('request-promise');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const { handleText, handleAudio, handleImage, handleSticker, handleVideo, handleLocation } = require('./controllers/ResponseController');
+const { reply } = require('./clientHelper');
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
@@ -43,32 +44,15 @@ app.post('/callback', line.middleware(config), (req, res) => {
 });
 
 /* Sample req.body for testing mock
-{
-	"type": "message",
-	"message": { "type": "text", "text": "bye" },
-	"replyToken": "1111111"
-}
+{"type": "message","message": { "type": "text", "text": "cat lord" },"replyToken": "1111111"}
 */
 app.post('/mock', (req, res) => {
   const events = req.body;
   Promise
-    .all(events.map(event => handleEvent(event)))
-    .then(result => res.status(200).send(result))
+    .all(events.map(handleEvent))
+    .then(result => console.log(result))
     .catch(err => res.status(500).send('error'))
 });
-
-const replyText = (client, token, texts) => {
-  console.log('prepare to reply : ' + JSON.stringify(texts))
-  // texts = Array.isArray(texts) ? texts : [texts];
-  // return client.replyMessage(
-  //   token,
-  //   texts.map((text) => ({ type: 'text', text }))
-  // );
-  return client.replyMessage(
-    token,
-    texts
-  );
-};
 
 async function handleEvent(event) {
   if (event.replyToken && event.replyToken.match(/^(.)\1*$/)) {
@@ -80,22 +64,22 @@ async function handleEvent(event) {
       const { message } = event;
       switch (message.type) {
         case 'text':
-          return replyText(client, event.replyToken, await handleText(message, event.source));
+          return reply(client, event.replyToken, await handleText(message, event.source));
           break;
         case 'image':
-          return replyText(client, event.replyToken, await handleImage(message, event.source));
+          return reply(client, event.replyToken, await handleImage(message, event.source));
           break;
         case 'video':
-          return replyText(client, event.replyToken, await handleVideo(message, event.source));
+          return reply(client, event.replyToken, await handleVideo(message, event.source));
           break;
         case 'audio':
-          return replyText(client, event.replyToken, await handleAudio(message, event.source));
+          return reply(client, event.replyToken, await handleAudio(message, event.source));
           break;
         case 'location':
-          return replyText(client, event.replyToken, await handleLocation(message, event.source));
+          return reply(client, event.replyToken, await handleLocation(message, event.source));
           break;
         case 'sticker':
-          return replyText(client, event.replyToken, await handleSticker(message, event.source));
+          return reply(client, event.replyToken, await handleSticker(message, event.source));
           break;
         default:
           throw new Error(`Unknown message: ${JSON.stringify(message)}`);

@@ -58,7 +58,7 @@ app.post('/mock', (req, res) => {
 });
 
 const replyText = (client, token, texts) => {
-  console.log(texts)
+  console.log('prepare to reply : ' + JSON.stringify(texts))
   // texts = Array.isArray(texts) ? texts : [texts];
   // return client.replyMessage(
   //   token,
@@ -67,7 +67,7 @@ const replyText = (client, token, texts) => {
   client.replyMessage(
     token,
     texts
-  )
+  );
 };
 
 async function handleEvent(event) {

@@ -160,7 +160,7 @@ const handleText = async (message, source) => {
     //           .then(() => client.leaveRoom(source.roomId));
     //     }
       default:
-        console.log(`Echo message`);
+        console.log(`[ResponseController.handleText] return with case default`);
         return await composeReply(message);
     }
 }
@@ -176,7 +176,7 @@ const composeReply = async (message) => {
 };
 
 const composeRichReplyForMtgApi = (cardName) => {
-  if (!cardName) return 'Sorry, nothing was found...'
+  if (!cardName) return {type: 'text', text: 'Sorry, no card was found...'}
   return [{
     "type": "template",
     "altText": cardName,

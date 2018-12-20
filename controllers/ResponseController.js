@@ -3,6 +3,7 @@ const faceApi = require('../services/faceApi');
 const baseURL = process.env.BASE_URL;
 const natural = require('natural');
 const tokenizer = new natural.WordTokenizer();
+const actionPrompt = require('../resources/action');
 
 const handleText = async (message, source) => {
     const buttonsImageURL = `${baseURL}/static/buttons/1040.jpg`;
@@ -168,6 +169,9 @@ const getDefaultReply = async (message) => {
   const { text } = message;
   const tokens = tokenizer.tokenize(text);
   console.log(tokens);
+  if (tokens.includes('choice')){
+    return actionPrompt;
+  }
   if (tokens.includes('http')) {
       const personGuess = await faceApi.recognizeFaceFromUrl(text);
       return composeTextResponse(personGuess);

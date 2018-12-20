@@ -43,11 +43,9 @@ app.post('/callback', line.middleware(config), (req, res) => {
     });
 });
 
-/* Sample req.body for testing mock
-{"type": "message","message": { "type": "text", "text": "cat lord" },"replyToken": "1111111"}
-*/
+/* Sample events can be found at test/mock */
 app.post('/mock', (req, res) => {
-  const events = req.body;
+  const { events } = req.body;
   Promise
     .all(events.map(handleEvent))
     .then(() => res.end())

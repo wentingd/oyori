@@ -176,10 +176,6 @@ const getDefaultReply = async (message) => {
   return cardGuesses.map(card => composeRichReplyForMtgApi(card));
 };
 
-const composeTextResponse = (textContent) => {
-  return { type: 'text', text: textContent }
-};
-
 const composeRichReplyForMtgApi = (card) => {
   if (!card) return { type: 'text', text: 'ごめん、有力なカード候補が見つかりません…' };
   return {
@@ -187,7 +183,7 @@ const composeRichReplyForMtgApi = (card) => {
     altText: card.name,
     template: {
       type: 'buttons',
-      thumbnailImageUrl: card.imageUrl,
+      //thumbnailImageUrl: card.imageUrl,
       title: card.name,
       text: card.name,
       actions: [
@@ -218,6 +214,10 @@ const handleLocation = (message, source) => {
 const handleSticker = (message, source) => {
   return { type: 'sticker', packageId: '11539', stickerId: '52114115' }
 }
+
+const composeTextResponse = (textContent) => {
+  return { type: 'text', text: textContent }
+};
 
 module.exports = {
   handleText,

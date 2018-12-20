@@ -36,7 +36,7 @@ app.post('/callback', line.middleware(config), (req, res) => {
     return res.status(500).end();
   }
   Promise.all(req.body.events.map(handleEvent))
-    .then(() => res.status(200).end())
+    .then(() => res.end())
     .catch((err) => {
       console.error(err);
       res.status(500).end();
@@ -51,7 +51,10 @@ app.post('/mock', (req, res) => {
   Promise
     .all(events.map(handleEvent))
     .then(() => res.end())
-    .catch(err => res.status(500).send('error'))
+    .catch(err => {
+      console.log(err)
+      res.status(500).send('error')
+    })
 });
 
 async function handleEvent(event) {

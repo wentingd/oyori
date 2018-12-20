@@ -64,7 +64,7 @@ const replyText = (client, token, texts) => {
   //   token,
   //   texts.map((text) => ({ type: 'text', text }))
   // );
-  client.replyMessage(
+  return client.replyMessage(
     token,
     texts
   );

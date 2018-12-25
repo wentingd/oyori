@@ -1,6 +1,8 @@
 const request = require('request-promise');
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
-require('dotenv').config();
 const apiBaseUri = process.env.AZURE_FACE_API_URI;
 const groupName = process.env.AZURE_PERSON_GROUP_NAME;
 

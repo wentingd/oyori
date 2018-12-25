@@ -9,6 +9,7 @@
   "dependencies": {
     "@line/bot-sdk": "^6.4.0",
     "async": "^2.6.1",
+    "axios-https-proxy-fix": "^0.17.1",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "dotenv": "^6.1.0",

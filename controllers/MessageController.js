@@ -1,9 +1,14 @@
 const mtgApi = require('../services/mtgApi');
 const faceApi = require('../services/faceApi');
-const baseURL = process.env.BASE_URL;
+const weatherApi = require('../services/weatherApi');
 const natural = require('natural');
 const tokenizer = new natural.WordTokenizer();
-const actionPrompt = require('../resources/action');
+const { mtg, faceRecognition, greeting, navigation } = require('../resources/intents');
+const { confirmation } = require('../resources/reply/templates');
+const { mainMenu } = require('../resources/reply/quickReply');
+const { hello } = require('../resources/reply/flex');
+
+const baseURL = process.env.BASE_URL;
 
 const handleText = async (message, source) => {
     const buttonsImageURL = `${baseURL}/static/buttons/1040.jpg`;
@@ -168,16 +173,32 @@ const handleText = async (message, source) => {
 const getDefaultReply = async (message) => {
   const { text } = message;
   const tokens = tokenizer.tokenize(text);
-  console.log(tokens);
-  if (tokens.includes('choice')){
-    return actionPrompt;
+  if (tokens.some(intent => navigation.includes(intent))){
+    return mainMenu;
+  }
+  if (tokens.some(intent => faceRecognition.includes(intent))){
+    return confirmation;
+  }
+  if (tokens.some(intent => greeting.includes(intent))){
+    const tokyo =  '1850147';
+    const temp = await weatherApi.getWeatherByCityId(tokyo).then(res => res.main.temp);
+    const weatherGreeting = temp > 20 ? (temp < 27 ? 'よい天気ですね。': '暑苦しい日は苦手です...') : '今日の東京は寒いです...お茶でも飲みたいなー';
+    return composeTextResponse(['こんにちわー', weatherGreeting]);
   }
   if (tokens.includes('http')) {
-      const personGuess = await faceApi.recognizeFaceFromUrl(text);
-      return composeTextResponse(personGuess);
+    const personGuess = await faceApi.recognizeFaceFromUrl(text);
+    return composeTextResponse(personGuess);
   }
-  const cardGuesses = await mtgApi.getCardRecommendations(text);
-  return cardGuesses.map(card => composeRichReplyForMtgApi(card));
+  if (tokens.some(intent => mtg.includes(intent))){
+    return composeTextResponse('"mtg"の後ろにカードのタイプとキーワードを入力してくださいー');
+  }
+  if (tokens.includes('mtg')){
+    const type = tokens[1];
+    const ruleText = tokens[2];
+    const cardGuesses = await mtgApi.getCardRecommendations(type, ruleText, 3);
+    return cardGuesses.map(card => composeRichReplyForMtgApi(card));
+  }
+  return [composeTextResponse('ごめんなさい、今のをよく理解できなかった...'), mainMenu];
 };
 
 const composeRichReplyForMtgApi = (card) => {
@@ -220,6 +241,10 @@ const handleSticker = (message, source) => {
 }
 
 const composeTextResponse = (textContent) => {
+  console.log(textContent)
+  if (Array.isArray(textContent)) {
+    return textContent.map(message => ({ type: 'text', text: message }));
+  }
   return { type: 'text', text: textContent }
 };
 

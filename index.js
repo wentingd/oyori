@@ -2,11 +2,10 @@
 
 const line = require('@line/bot-sdk');
 const express = require('express');
-const request = require('request-promise');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-const { handleText, handleAudio, handleImage, handleSticker, handleVideo, handleLocation } = require('./controllers/ResponseController');
-const { reply } = require('./clientHelper');
+const { handleText, handleAudio, handleImage, handleSticker, handleVideo, handleLocation } = require('./controllers/MessageController');
+const { reply, push } = require('./clientHelper');
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config();
@@ -87,11 +86,11 @@ async function handleEvent(event) {
           break;
       }
     // case 'follow':
-    //   return replyText(event.replyToken, 'Got followed event');
+    //   return reply(client, event.replyToken, 'Got followed event');
     // case 'unfollow':
     //   return console.log(`Unfollowed this bot: ${JSON.stringify(event)}`);
     // case 'join':
-    //   return replyText(event.replyToken, `Joined ${event.source.type}`);
+    //   return reply(client, event.replyToken, `Joined ${event.source.type}`);
     // case 'leave':
     //   return console.log(`Left: ${JSON.stringify(event)}`);
     // case 'postback':
@@ -99,15 +98,16 @@ async function handleEvent(event) {
     //   if (data === 'DATE' || data === 'TIME' || data === 'DATETIME') {
     //     data += `(${JSON.stringify(event.postback.params)})`;
     //   }
-    //   return replyText(event.replyToken, `Got postback: ${data}`);
+    //   return reply(client, event.replyToken, `Got postback: ${data}`);
     // case 'beacon':
-    //   return replyText(event.replyToken, `Got beacon: ${event.beacon.hwid}`);
+    //   return reply(client, event.replyToken, `Got beacon: ${event.beacon.hwid}`);
     default:
       throw new Error(`Unknown event type: ${JSON.stringify(eventType)}`);
   }
 }
 
 const port = process.env.PORT || 3000;
+
 app.listen(port, () => {
   console.log(`listening on ${port}`);
 });

@@ -1,12 +1,14 @@
-const mtgApi = require('../services/mtgApi');
-const faceApi = require('../services/faceApi');
-const weatherApi = require('../services/weatherApi');
 const natural = require('natural');
 const tokenizer = new natural.WordTokenizer();
-const { mtg, faceRecognition, greeting, navigation } = require('../resources/intents');
-const { confirmation } = require('../resources/reply/templates');
-const { mainMenu } = require('../resources/reply/quickReply');
-const { hello } = require('../resources/reply/flex');
+
+const mtgApi = require('./services/mtgApi');
+const faceApi = require('./services/faceApi');
+const weatherApi = require('./services/weatherApi');
+const { mtg, faceRecognition, greeting, navigation } = require('./resources/intent');
+const { mainMenu } = require('./resources/reply/quickReply');
+const { composeTextResponse, composeStickerResponse } = require('./clientHelper');
+const { Dialog } = require('./resources/conversationManager');
+const dialogs = require('./resources/dialogs');
 
 const baseURL = process.env.BASE_URL;
 
@@ -176,28 +178,34 @@ const getDefaultReply = async (message) => {
   if (tokens.some(intent => navigation.includes(intent))){
     return mainMenu;
   }
+  if (tokens.some(intent => mtg.includes(intent))){
+    console.log('intent: mtg');
+    let mtgCardFinderDialog = new Dialog(dialogs[0].id, dialogs[0].name, dialogs[0].steps);
+    return mtgCardFinderDialog.start();
+  }
   if (tokens.some(intent => greeting.includes(intent))){
+    console.log('intent: greeting');
     const tokyo =  '1850147';
     const temp = await weatherApi.getWeatherByCityId(tokyo).then(res => res.main.temp);
     const weatherGreeting = temp > 20 ? (temp < 27 ? 'よい天気ですね。': '暑苦しい日は苦手です...') : '今日の東京は寒いです...お茶でも飲みたいなー';
     return composeTextResponse(['こんにちわー', weatherGreeting]);
   }
-  if (tokens.some(intent => faceRecognition.includes(intent))){
-    return composeTextResponse('"http..."から始まる画像をそのまま貼ってくださいー');
-  }
-  if (tokens.includes('http')) {
-    const personGuess = await faceApi.recognizeFaceFromUrl(text);
-    return composeTextResponse(personGuess);
-  }
-  if (tokens.some(intent => mtg.includes(intent))){
-    return composeTextResponse('"mtg"の後ろにカードのタイプとキーワードを入力してくださいー');
-  }
-  if (tokens.includes('mtg')){
-    const type = tokens[1];
-    const ruleText = tokens[2];
-    const cardGuesses = await mtgApi.getCardRecommendations(type, ruleText, 3);
-    return cardGuesses.map(card => composeRichReplyForMtgApi(card));
-  }
+  // if (tokens.some(intent => faceRecognition.includes(intent))){
+  //   return composeTextResponse('"http..."から始まる画像をそのまま貼ってくださいー');
+  // }
+  // if (tokens.includes('http')) {
+  //   const personGuess = await faceApi.recognizeFaceFromUrl(text);
+  //   return composeTextResponse(personGuess);
+  // }
+  // if (tokens.some(intent => mtg.includes(intent))){
+  //   return composeTextResponse('"mtg"の後ろにカードのタイプとキーワードを入力してくださいー');
+  // }
+  // if (tokens.includes('mtg')){
+  //   const type = tokens[1];
+  //   const ruleText = tokens[2];
+  //   const cardGuesses = await mtgApi.getCardRecommendations(type, ruleText, 3);
+  //   return cardGuesses.map(card => composeRichReplyForMtgApi(card));
+  // }
   return [composeTextResponse('ごめんなさい、今のをよく理解できなかった...'), mainMenu];
 };
 
@@ -237,16 +245,8 @@ const handleLocation = (message, source) => {
 }
 
 const handleSticker = (message, source) => {
-  return { type: 'sticker', packageId: '11539', stickerId: '52114115' }
+  return composeStickerResponse();
 }
-
-const composeTextResponse = (textContent) => {
-  console.log(textContent)
-  if (Array.isArray(textContent)) {
-    return textContent.map(message => ({ type: 'text', text: message }));
-  }
-  return { type: 'text', text: textContent }
-};
 
 module.exports = {
   handleText,

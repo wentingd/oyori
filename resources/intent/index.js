@@ -33,7 +33,10 @@ const navigation = [
 const mtg = [
     "play",
     "card",
-    "Magic"
+    "Magic",
+    "Mtg",
+    "mtg",
+    "Magic The Gathering"
 ];
 
 const faceRecognition = [

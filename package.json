@@ -14,11 +14,14 @@
     "debug": "~2.6.9",
     "dotenv": "^6.1.0",
     "express": "~4.16.0",
+    "helmet": "^3.15.0",
     "http-errors": "~1.6.2",
+    "mongoose": "^5.4.1",
     "morgan": "~1.9.0",
     "natural": "^0.6.2",
     "request": "^2.88.0",
-    "request-promise": "^4.2.2"
+    "request-promise": "^4.2.2",
+    "request-promise-native": "^1.0.5"
   },
   "main": "index.js",
   "author": "",

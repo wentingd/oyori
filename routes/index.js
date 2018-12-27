@@ -3,7 +3,7 @@ const router = express.Router();
 const apiRoutes = require('./api');
 
 router.get('/', (req, res, next) => {
-  res.send('nothing here');
+  res.send('Hello Oyori');
 });
 
 router.use('/api', apiRoutes);

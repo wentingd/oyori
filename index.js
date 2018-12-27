@@ -1,36 +1,37 @@
 'use strict';
 
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+};
+
 const line = require('@line/bot-sdk');
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const helmet = require('helmet');
+const db = require('./db');
 const routes = require('./routes')
-const { handleText, handleAudio, handleImage, handleSticker, handleVideo, handleLocation } = require('./controllers/MessageController');
-const { reply, push } = require('./clientHelper');
+const { handleText, handleAudio, handleImage, handleSticker, handleVideo, handleLocation } = require('./botController');
+const { reply } = require('./clientHelper');
 
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config();
-}
-
-const config = {
+const lineConfig = {
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
   channelSecret: process.env.LINE_CHANNEL_SECRET,
-};
-
-const client = new line.Client(config);
+}
+const client = new line.Client(lineConfig);
 
 const app = express();
 
+app.use(helmet());
 app.use(morgan('tiny'));
-// avoid using bodyParser on bot routes
-app.use('/mock', bodyParser.json());
+// use bodyParser only for non-bot routes
 app.use('/api', bodyParser.json());
 app.use('/', routes);
 
+// webhook callback
 app.get('/callback', (req, res) => res.end(`I'm listening. Please access with POST.`));
 
-// webhook callback
-app.post('/callback', line.middleware(config), (req, res) => {
+app.post('/callback', line.middleware(lineConfig), (req, res) => {
   if (req.body.destination) {
     console.log("Destination User ID: " + req.body.destination);
   }
@@ -43,18 +44,6 @@ app.post('/callback', line.middleware(config), (req, res) => {
       console.error(err);
       res.status(500).end();
     });
-});
-
-/* Sample events can be found at test/mock */
-app.post('/mock', (req, res) => {
-  const { events } = req.body;
-  Promise
-    .all(events.map(handleEvent))
-    .then(() => res.end())
-    .catch(err => {
-      console.log(err)
-      res.status(500).send('error')
-    })
 });
 
 async function handleEvent(event) {
@@ -88,22 +77,22 @@ async function handleEvent(event) {
           throw new Error(`Unknown message: ${JSON.stringify(message)}`);
           break;
       }
-    // case 'follow':
-    //   return reply(client, event.replyToken, 'Got followed event');
-    // case 'unfollow':
-    //   return console.log(`Unfollowed this bot: ${JSON.stringify(event)}`);
-    // case 'join':
-    //   return reply(client, event.replyToken, `Joined ${event.source.type}`);
-    // case 'leave':
-    //   return console.log(`Left: ${JSON.stringify(event)}`);
-    // case 'postback':
-    //   let data = event.postback.data;
-    //   if (data === 'DATE' || data === 'TIME' || data === 'DATETIME') {
-    //     data += `(${JSON.stringify(event.postback.params)})`;
-    //   }
-    //   return reply(client, event.replyToken, `Got postback: ${data}`);
-    // case 'beacon':
-    //   return reply(client, event.replyToken, `Got beacon: ${event.beacon.hwid}`);
+    case 'follow':
+      return reply(client, event.replyToken, 'Got followed event');
+    case 'unfollow':
+      return console.log(`Unfollowed this bot: ${JSON.stringify(event)}`);
+    case 'join':
+      return reply(client, event.replyToken, `Joined ${event.source.type}`);
+    case 'leave':
+      return console.log(`Left: ${JSON.stringify(event)}`);
+    case 'postback':
+      let data = event.postback.data;
+      if (data === 'DATE' || data === 'TIME' || data === 'DATETIME') {
+        data += `(${JSON.stringify(event.postback.params)})`;
+      }
+      return reply(client, event.replyToken, `Got postback: ${data}`);
+    case 'beacon':
+      return reply(client, event.replyToken, `Got beacon: ${event.beacon.hwid}`);
     default:
       throw new Error(`Unknown event type: ${JSON.stringify(eventType)}`);
   }

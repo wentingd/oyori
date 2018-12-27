@@ -176,14 +176,14 @@ const getDefaultReply = async (message) => {
   if (tokens.some(intent => navigation.includes(intent))){
     return mainMenu;
   }
-  if (tokens.some(intent => faceRecognition.includes(intent))){
-    return confirmation;
-  }
   if (tokens.some(intent => greeting.includes(intent))){
     const tokyo =  '1850147';
     const temp = await weatherApi.getWeatherByCityId(tokyo).then(res => res.main.temp);
     const weatherGreeting = temp > 20 ? (temp < 27 ? 'よい天気ですね。': '暑苦しい日は苦手です...') : '今日の東京は寒いです...お茶でも飲みたいなー';
     return composeTextResponse(['こんにちわー', weatherGreeting]);
+  }
+  if (tokens.some(intent => faceRecognition.includes(intent))){
+    return composeTextResponse('"http..."から始まる画像をそのまま貼ってくださいー');
   }
   if (tokens.includes('http')) {
     const personGuess = await faceApi.recognizeFaceFromUrl(text);

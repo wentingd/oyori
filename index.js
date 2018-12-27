@@ -4,6 +4,7 @@ const line = require('@line/bot-sdk');
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const routes = require('./routes')
 const { handleText, handleAudio, handleImage, handleSticker, handleVideo, handleLocation } = require('./controllers/MessageController');
 const { reply, push } = require('./clientHelper');
 
@@ -23,6 +24,8 @@ const app = express();
 app.use(morgan('tiny'));
 // avoid using bodyParser on bot routes
 app.use('/mock', bodyParser.json());
+app.use('/api', bodyParser.json());
+app.use('/', routes);
 
 app.get('/callback', (req, res) => res.end(`I'm listening. Please access with POST.`));
 

@@ -1,5 +1,7 @@
-const mtg = require('./mtg');
+const mtgCardFinder = require('./mtgCardFinder');
+const faceRecognition = require('./faceRecognition');
 
 module.exports = [
-    ...mtg
+    ...mtgCardFinder,
+    ...faceRecognition
 ]

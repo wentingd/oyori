@@ -1,4 +1,4 @@
-const userProfile = [{
+const dialog = [{
     "id": "1",
     "steps": [
         {
@@ -19,4 +19,4 @@ const userProfile = [{
     ]
 }]
 
-module.exports = userProfile;
+module.exports = dialog;

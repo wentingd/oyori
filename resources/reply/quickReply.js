@@ -8,8 +8,17 @@ const mainMenu = {
         "imageUrl": "https://mtg-jp.com/assets/images/common/card_placeholder.jpg",
         "action": {
           "type": "message",
-          "label": "MTGのカードを探したい",
-          "text": "Magic The Gathering"
+          "label": "MTGカード探し",
+          "text": "MTG card search"
+        }
+      },
+      {
+        "type": "action",
+        "imageUrl": "https://image.flaticon.com/icons/svg/235/235861.svg",
+        "action": {
+          "type": "message",
+          "label": "カードショップ探したい",
+          "text": "shop search"
         }
       },
       {
@@ -20,7 +29,7 @@ const mainMenu = {
           "label": "顔認識をしたい",
           "text": "アウトレイジ"
         }
-      }
+      },
     ]
   }
 }

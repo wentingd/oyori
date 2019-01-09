@@ -8,35 +8,64 @@ router.get('/dialog', (req, res, next) => {
     res.json(dialogs);
 });
 
-router.get('/dialog/:id', async (req, res, next) => {
-    const dialogId = req.params.id;
-    const targetDialog = dialogs.filter(dialog => dialog.id = dialogId)[0];
-    res.json(targetDialog);
+router.get('/dialog/:id', async (req, res) => {
+    const targetDialog = dialogs.filter(dialog => dialog.id === req.params.id)[0];
+    if (targetDialog) return res.status(200).json(targetDialog)
+    return res.status(404).json({msg: 'no dialog found'});
 });
 
-router.post('/user', (req, res) => {
+router.get('/user/:id', (req, res) => {
     User.findOne({
-        destinationId: req.body.destinationId
+        userId: req.params.id
     }).then(existingUser => {
         if (existingUser) {
-            res.json({msg: 'existing user'});
+            res.status(200).json(existingUser);
         } else {
-            User.create(req.body).then(result => res.json(result));
+            res.status(200).json({'msg': 'no such user'});
         }
     }).catch(err => console.log(err));
 });
 
-router.put('/user/conversation', (req, res) => {
+router.post('/user', (req, res) => {
     User.findOne({
-        destinationId: req.body.destinationId
+        userId: req.body.userId
+    }).then(existingUser => {
+        if (existingUser) {
+            res.status(200).json({msg: 'existing user'});
+        } else {
+            console.log('register a new user');
+            User.create(req.body).then(result => res.status(200).json(result));
+        }
+    }).catch(err => console.log(err));
+});
+
+router.put('/user/:id', (req, res) => {
+    const { currentDialog, currentStepCount } = req.body;
+    User.findOne({
+        userId: req.params.id
     }).then(existingUser => {
         if (existingUser) {
             User.updateOne({
-                currentDialog: req.body.currentDialog,
-                currentStep: req.body.currentStep
-            }).then(result => res.json(result));
+                currentDialog: currentDialog,
+                currentStepCount: currentStepCount
+            }).then(result => res.status(200).json(result));
         } else {
-            User.create(req.body).then(result => res.json(result));
+            User.create(req.body).then(result => res.status(200).json(result));
+        }
+    }).catch(err => console.log(err));
+});
+
+router.patch('/user/:id/prompt', (req, res) => {
+    User.findOne({
+        userId: req.params.id
+    }).then(existingUser => {
+        if (existingUser) {
+            User.updateOne({
+                prompt: {
+                    ...existingUser._doc.prompt,
+                    ...req.body
+                }
+            }).then(result => res.status(200).json(result));
         }
     }).catch(err => console.log(err));
 });

@@ -7,9 +7,10 @@ const mongoUrl = process.env.MONGO_URL || 'mongodb://localhost:27017/';
 const User = new Schema({
     name: String,
     location: String,
-    destinationId: String,
+    userId: String,
     currentDialog: String,
-    currentStep: Number
+    currentStepCount: Number,
+    prompt: Schema.Types.Mixed
 });
 
 console.log(`Mongo URL : ${mongoUrl}${dbName}`);

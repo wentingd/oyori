@@ -19,7 +19,13 @@ const none = [
     "wow",
     "bored",
     "no"
-]
+];
+
+const cancel = [
+    "cancel",
+    "やめる",
+    "ストップ"
+];
 
 const navigation = [
     "what can",
@@ -27,16 +33,26 @@ const navigation = [
     "feature",
     "menu",
     "メニュー",
-    "できる"
+    "できる",
+    "help"
 ]
 
-const mtg = [
-    "play",
+const card = [
     "card",
-    "Magic",
-    "Mtg",
-    "mtg",
-    "Magic The Gathering"
+    "MTG",
+    "マジックのカード",
+    "MTGのカード"
+];
+
+const search = [
+    "search",
+    "探したい",
+    "サーチ"
+];
+
+const cardShop = [
+    "shop",
+    "カードショップ"
 ];
 
 const faceRecognition = [
@@ -45,6 +61,35 @@ const faceRecognition = [
     "アウトレイジ",
     "顔認識",
     "顔"
-]
+];
 
-module.exports = { greeting, navigation, mtg, faceRecognition };
+const guessTopIntent = (tokens) => {
+    if (tokens.some(intent => navigation.includes(intent))){
+        console.log('intent: navigation');
+        return 'navigation';
+    }
+    if (tokens.some(intent => cancel.includes(intent))){
+        console.log('intent: cancel');
+        return 'cancel';
+    }
+    if (tokens.some(intent => greeting.includes(intent))){
+        console.log('intent: greeting');
+        return 'greeting';
+    }
+    if (tokens.some(intent => card.includes(intent)) && tokens.some(intent => search.includes(intent))){
+        console.log('intent: mtg card search');
+        return 'card search';
+    }
+    if (tokens.some(intent => cardShop.includes(intent)) && tokens.some(intent => search.includes(intent))){
+        console.log('intent: card shop');
+        return 'shop search';
+    }
+    if (tokens.some(intent => faceRecognition.includes(intent))){
+        console.log('intent: face rec');
+        return 'face recognition';
+    }
+    console.log(tokens)
+    console.log('no intent detected');
+}
+
+module.exports = { guessTopIntent };

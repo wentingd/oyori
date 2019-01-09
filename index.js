@@ -11,7 +11,7 @@ const bodyParser = require('body-parser');
 const helmet = require('helmet');
 const db = require('./db');
 const routes = require('./routes')
-const { handleText, handleAudio, handleImage, handleSticker, handleVideo, handleLocation } = require('./botController');
+const { handleText, handleLocation, handleImage, handleSticker, handleUnknown } = require('./botController');
 const { reply } = require('./clientHelper');
 
 const lineConfig = {
@@ -33,7 +33,7 @@ app.get('/callback', (req, res) => res.end(`I'm listening. Please access with PO
 
 app.post('/callback', line.middleware(lineConfig), (req, res) => {
   if (req.body.destination) {
-    console.log("Destination User ID: " + req.body.destination);
+    console.log("[index.js] Destination ID: " + req.body.destination);
   }
   if (!Array.isArray(req.body.events)) {
     return res.status(500).end();
@@ -58,23 +58,17 @@ async function handleEvent(event) {
         case 'text':
           return reply(client, event.replyToken, await handleText(message, event.source));
           break;
-        case 'image':
-          return reply(client, event.replyToken, await handleImage(message, event.source));
-          break;
-        case 'video':
-          return reply(client, event.replyToken, await handleVideo(message, event.source));
-          break;
-        case 'audio':
-          return reply(client, event.replyToken, await handleAudio(message, event.source));
-          break;
         case 'location':
           return reply(client, event.replyToken, await handleLocation(message, event.source));
+          break;
+        case 'image':
+          return reply(client, event.replyToken, await handleImage(message, event.source));
           break;
         case 'sticker':
           return reply(client, event.replyToken, await handleSticker(message, event.source));
           break;
         default:
-          throw new Error(`Unknown message: ${JSON.stringify(message)}`);
+          return reply(client, evnet.replyToken, handleUnknown(message, event.source))
           break;
       }
     case 'follow':

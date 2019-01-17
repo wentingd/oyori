@@ -10,6 +10,9 @@ const detectUserLang = (text) => {
 }
 
 const guessIntentWithLang = (text, lang) => {
+    if (!lang) {
+        lang = detectUserLang(text);
+    }
     if (lang === 'en') {
         return guessIntentFromTokens(tokenizerEn.tokenize(text));
     }

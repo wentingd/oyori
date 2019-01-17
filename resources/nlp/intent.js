@@ -40,7 +40,10 @@ const yes = [
 
 const no = [
     'no',
-    'stop'
+    'don\'t know',
+    'いいえ',
+    '知らん',
+    'ない'
 ];
 
 const cancel = [
@@ -63,7 +66,8 @@ const navigation = [
     "何か",
     "できる",
     "help",
-    "ナビ"
+    "ナビ",
+    "もう一回"
 ]
 
 const card = [

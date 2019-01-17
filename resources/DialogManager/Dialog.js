@@ -2,6 +2,7 @@ const { composeTextResponse } = require('../../clientHelper');
 const { dialogConfig } = require('./config');
 const DialogService = require('./DialogService');
 // refactor this later
+const { guessIntentWithLang } = require('../nlp');
 const mtgApi = require('../../services/mtgApi');
 const { composeRichReplyForMtgApi } = require('../../clientHelper');
 
@@ -45,8 +46,15 @@ Dialog.prototype.cancel = async function(userId, dialogId){
 };
 
 const updatePrompt = async (userId, step, userText) => {
+    const topIntent = guessIntentWithLang(userText);
     const { promptId } = step;
+    if (topIntent === 'no' ) {
+        console.log('here')
+        await DialogService.updatePrompt(userId, promptId, '');
+        return;
+    };
     await DialogService.updatePrompt(userId, promptId, userText);
+    return;
 }
 
 // refactor this later

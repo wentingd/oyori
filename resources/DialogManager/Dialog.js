@@ -51,8 +51,13 @@ const updatePrompt = async (userId, step, userText) => {
 
 // refactor this later
 const cardSearchResult = async (cardParams) => {
-    const { cardName, cardType, cardSubType, cardRuleText } = cardParams;
-    const cardGuesses = await mtgApi.getCardRecommendations(cardSubType, cardRuleText, 1);
+    const { cardName, cardType, cardSubType, cardRuleText } = cardParams || {};
+    let cardGuesses = [];
+    if (cardName) {
+        cardGuesses = await mtgApi.getCardByName(cardName);
+    } else {
+        cardGuesses = await mtgApi.getCardByTypeAndRule(cardSubType, cardRuleText, 1);
+    }
     return cardGuesses.map(card => composeRichReplyForMtgApi(card));
 };
 

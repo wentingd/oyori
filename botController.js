@@ -23,6 +23,7 @@ const handleText = async (message, source) => {
   if (currentDialog && topIntent !== 'cancel') {
     return await returnToCurrentDialog(userId, currentDialog, currentStepCount, text, prompt);
   }
+  console.log('CurrentDialog :: ' + currentDialog);
   switch (topIntent) {
     case 'navigation':
       return mainMenu;

@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-
-const dbName = process.env.DB_NAME || 'oyori';
-const mongoUrl = process.env.MONGO_URL || 'mongodb://localhost:27017/';
+const mongoConnectionString = process.env.MONGO_CONNECTION_STRING || 'mongodb://localhost:27017/oyori';
 
 const User = new Schema({
     name: String,
@@ -13,12 +11,10 @@ const User = new Schema({
     prompt: Schema.Types.Mixed
 });
 
-console.log(`Mongo URL : ${mongoUrl}${dbName}`);
-
 mongoose.model('User', User);
-mongoose.connect(mongoUrl, {
-    dbName: dbName,
+mongoose.connect(mongoConnectionString, {
     useNewUrlParser: true,
     keepAlive: true
 })
+.then(() => console.log(`Connected to Mongo at : ${mongoConnectionString}`))
 .catch(err => console.log(err));

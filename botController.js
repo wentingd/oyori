@@ -1,8 +1,11 @@
 
 const { detectUserLang, guessIntentWithLang, generateRandomGreetings, generateWeatherGreeting } = require('./resources/nlp');
 const { mainMenu } = require('./resources/reply/quickReply');
-const { composeTextResponse, composeStickerResponse } = require('./clientHelper');
+const { composeTextResponse, composeStickerResponse, composeRichReplyForShop } = require('./clientHelper');
 const { Dialog, DialogService } = require('./resources/DialogManager');
+const googlePlaceApi = require('./services/googlePlaceApi');
+const mtgCardFinderDialog = require('./resources/dialogs/mtgCardFinder');
+const mtgShopFinderDialog = require('./resources/dialogs/mtgShopFinder');
 
 const handleText = async (message, source) => {
   const { text } = message;
@@ -50,20 +53,22 @@ const handleText = async (message, source) => {
 }
 
 const subscribeToDialogById = async (userId, dialogId, userText) => {
-  const dialogContents = await DialogService.getDialogById(dialogId);
-  const dialog = new Dialog(dialogContents);
+  const contents = await DialogService.getDialogById(dialogId);
+  const dialog = new Dialog(contents);
   return await dialog.init(userId, dialogId, userText);
 };
 
 const cancelDialogById = async (userId, dialogId) => {
-  const dialogContents = await DialogService.getDialogById(dialogId);
-  const dialog = new Dialog(dialogContents);
+  const contents = await DialogService.getDialogById(dialogId);
+  const dialog = new Dialog(contents);
   return await dialog.cancel(userId, dialogId);
 };
 
 const returnToCurrentDialog = async (userId, dialogId, currentStepCount, userText, prompt) => {
-  const dialogContents = await DialogService.getDialogById(dialogId);
-  const dialog = new Dialog(dialogContents);
+  const contents = await DialogService.getDialogById(dialogId);
+  // TODO: find a way to get finalReplyHandler by dialog ID
+  const { finalReplyHandler } = dialogId === '1' ? mtgCardFinderDialog : {};
+  const dialog = new Dialog(contents, finalReplyHandler);
   return await dialog.continue(userId, dialogId, currentStepCount, userText, prompt);
 };
 
@@ -72,10 +77,13 @@ const handleLocation = async (message, source) => {
   const { currentDialog } = await DialogService.getCurrentDialog(userId);
   if (currentDialog === '2'){
     const recommendations = await googlePlaceApi.getShopNearby(message);
-    console.log(recommendations)
-    return composeTextResponse('wip');
+    if (recommendations) {
+      return recommendations.map(place => composeRichReplyForShop(place));
+    } else {
+      return composeTextResponse('残念、この近くショップを見つからなかったです...')
+    }
   } else {
-    return composeTextResponse('うん?どうしたんですか?')
+    return composeTextResponse('もしかして、カードショップを探したい?それなら"menu"って入力してみて!')
   };
 }
 
@@ -84,7 +92,7 @@ const handleImage = (message, source) => {
 }
 
 const handleUnknown = (message, source) => {
-  return composeTextResponse('嬉しいけど、このタイプのメッセージはまだ読み取れないんです><');
+  return composeTextResponse('このタイプのメッセージはまだ読み取れないんです><');
 }
 
 const handleSticker = (message, source) => {

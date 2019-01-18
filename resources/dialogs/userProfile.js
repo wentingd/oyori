@@ -1,5 +1,5 @@
-const dialog = [{
-    "id": "1",
+const contents = [{
+    "id": "4",
     "steps": [
         {
             "id": "1",
@@ -19,4 +19,4 @@ const dialog = [{
     ]
 }]
 
-module.exports = dialog;
+module.exports = { contents };

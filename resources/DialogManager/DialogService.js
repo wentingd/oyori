@@ -42,7 +42,6 @@ const getFromApi = (action) => {
         method: 'GET',
         uri: baseUrl + action,
         json: true,
-        //resolveWithFullResponse: true
     };
     return request(options);
 };
@@ -53,7 +52,6 @@ const putToApi = (action, body) => {
         uri: baseUrl + action,
         body: body,
         json: true,
-        //resolveWithFullResponse: true
     };
     return request(options);
 };
@@ -64,7 +62,6 @@ const patchToApi = (action, body) => {
         uri: baseUrl + action,
         body: body,
         json: true,
-        //resolveWithFullResponse: true
     };
     return request(options);
 };
@@ -75,7 +72,6 @@ const postToApi = (action, body) => {
         uri: baseUrl + action,
         body: body,
         json: true,
-        //resolveWithFullResponse: true
     };
     return request(options);
 }

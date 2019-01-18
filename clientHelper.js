@@ -25,6 +25,24 @@ const composeRichReplyForMtgApi = (card) => {
       }}
   };
 
+const composeRichReplyForShop = (shop) => {
+    if (!shop) return { type: 'text', text: 'すみません、ショップを見つからなかったです…' };
+    return {
+        type: 'template',
+        altText: shop.name,
+        template: {
+            type: 'buttons',
+            title: shop.name,
+            text: shop.vicinity + ' : ' +  shop.opening_hours.open_now ? '営業中' : '営業時間外',
+            actions: [{
+                type: 'uri',
+                label: 'Google Map',
+                uri: `https://www.google.com/maps/search/?api=1&query=shop&query_place_id=${shop.place_id}`
+            }]
+        }
+    }
+};
+
 const composeStickerResponse = (packageId, stickerId) => {
     return packageId & stickerId ? { packageId: packageId, stickerId: stickerId } : { packageId: '11539', stickerId: '52114115' };
 }
@@ -41,6 +59,7 @@ module.exports = {
     composeTextResponse,
     composeStickerResponse,
     composeRichReplyForMtgApi,
+    composeRichReplyForShop,
     reply,
     push
 }

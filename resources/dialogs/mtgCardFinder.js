@@ -1,4 +1,4 @@
-const dialog = [{
+const contents = [{
     "id": "1",
     "name": "mtgCardFinder",
     "steps": [
@@ -29,4 +29,17 @@ const dialog = [{
     ]
 }]
 
-module.exports = dialog;
+const finalReplyHandler = async (cardParams) => {
+    const { composeRichReplyForMtgApi } = require('../../clientHelper');
+    const { getCardByName, getCardByTypeAndRule } = require('../../services/mtgApi');
+    const { cardName, cardType, cardSubType, cardRuleText } = cardParams || {};
+    let cardGuesses = [];
+    if (cardName) {
+        cardGuesses = await getCardByName(cardName);
+    } else {
+        cardGuesses = await getCardByTypeAndRule(cardSubType, cardRuleText || cardType, 1);
+    }
+    return cardGuesses.map(card => composeRichReplyForMtgApi(card));
+};
+
+module.exports = { contents, finalReplyHandler };

@@ -1,13 +1,11 @@
 const { composeTextResponse } = require('../../clientHelper');
 const { dialogConfig } = require('./config');
 const DialogService = require('./DialogService');
-// refactor this later
 const { guessIntentWithLang } = require('../nlp');
-const mtgApi = require('../../services/mtgApi');
-const { composeRichReplyForMtgApi } = require('../../clientHelper');
 
-function Dialog (dialogBody) {
+function Dialog (dialogBody, finalReplyHandler) {
     this.steps = dialogBody.steps;
+    this.finalReplyHandler = finalReplyHandler;
 };
 
 Dialog.prototype.init = async function(userId, dialogId, userText){
@@ -30,7 +28,7 @@ Dialog.prototype.continue = async function(userId, dialogId, currentStepCount, u
             currentDialog: '',
             currentStepCount: 0,
         });
-        return await cardSearchResult(prompt);
+        return await this.finalReplyHandler ? this.finalReplyHandler(prompt) : dialogConfig.endDialogMsg;
     }
     //if not end, increment & continue
     await DialogService.updateDialog(userId, {
@@ -49,24 +47,11 @@ const updatePrompt = async (userId, step, userText) => {
     const topIntent = guessIntentWithLang(userText);
     const { promptId } = step;
     if (topIntent === 'no' ) {
-        console.log('here')
         await DialogService.updatePrompt(userId, promptId, '');
         return;
     };
     await DialogService.updatePrompt(userId, promptId, userText);
     return;
-}
-
-// refactor this later
-const cardSearchResult = async (cardParams) => {
-    const { cardName, cardType, cardSubType, cardRuleText } = cardParams || {};
-    let cardGuesses = [];
-    if (cardName) {
-        cardGuesses = await mtgApi.getCardByName(cardName);
-    } else {
-        cardGuesses = await mtgApi.getCardByTypeAndRule(cardSubType, cardRuleText, 1);
-    }
-    return cardGuesses.map(card => composeRichReplyForMtgApi(card));
 };
 
 module.exports = Dialog;

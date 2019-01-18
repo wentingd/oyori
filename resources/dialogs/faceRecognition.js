@@ -1,4 +1,4 @@
-const faceRecognition = [{
+const contents = [{
     "id": "3",
     "name": "faceRecognition",
     "steps": [
@@ -12,4 +12,4 @@ const faceRecognition = [{
     ]
 }];
 
-module.exports = faceRecognition;
+module.exports = { contents };

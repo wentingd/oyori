@@ -3,10 +3,10 @@ if (process.env.NODE_ENV !== 'production') {
   };
 
 const request = require('request-promise-native');
-const baseUrl = process.env.BASE_URL;
+const baseUrl = process.env.BASE_URL || '';
 
 const getCurrentDialog = (userId) => {
-    return getFromApi('/api/user/' + userId).catch(err => console.log(err));
+    return getFromApi('/api/user/' + userId).catch(err => console.log(err.message));
 };
 
 const initDialog = async (userId, dialogId) => {
@@ -24,17 +24,17 @@ const initDialog = async (userId, dialogId) => {
 };
 
 const updateDialog = (userId, newDialog) => {
-    return putToApi('/api/user/' + userId, newDialog).catch(err => console.log(err));
+    return putToApi('/api/user/' + userId, newDialog).catch(err => console.log(err.message));
 };
 
 const updatePrompt = (userId, promptId, userInput) => {
     let newPrompt = {};
     newPrompt[promptId] = userInput;
-    return patchToApi('/api/user/' + userId + '/prompt', newPrompt).catch(err => console.log(err));
+    return patchToApi('/api/user/' + userId + '/prompt', newPrompt).catch(err => console.log(err.message));
 };
 
 const getDialogById = (dialogId) => {
-    return getFromApi('/api/dialog/' + dialogId).catch(err => console.log(err));
+    return getFromApi('/api/dialog/' + dialogId).catch(err => console.log(err.message));
 }
 
 const getFromApi = (action) => {

@@ -7,7 +7,7 @@
     "dev": "nodemon index.js"
   },
   "dependencies": {
-    "@line/bot-sdk": "^6.4.0",
+    "@line/bot-sdk": "^6.7.1",
     "async": "^2.6.1",
     "axios-https-proxy-fix": "^0.17.1",
     "cookie-parser": "~1.4.3",
@@ -29,7 +29,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "nodemon": "^1.18.7"
+    "nodemon": "^1.19.1"
   },
   "engines": {
     "node": "8.11.1"

@@ -17,4 +17,4 @@ mongoose.connect(mongoConnectionString, {
     keepAlive: true
 })
 .then(() => console.log(`Connected to Mongo at : ${mongoConnectionString}`))
-.catch(err => console.log(err));
+.catch(err => console.log(err.message));

@@ -7,7 +7,7 @@
     "dev": "nodemon index.js"
   },
   "dependencies": {
-    "@line/bot-sdk": "6.7.1",
+    "@line/bot-sdk": "^6.7.1",
     "async": "^2.6.1",
     "axios-https-proxy-fix": "^0.17.1",
     "cookie-parser": "~1.4.3",
